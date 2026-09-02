@@ -12,3 +12,6 @@ The PostgreSQL 17 integration suite is retained behind the `integration` build
 tag. It requires an isolated database through
 `GOTTH_PG_MIGRATE_TEST_DATABASE_URL`; no production database was used during
 repository extraction.
+
+Graphify 0.9.32 code-only audit: 207 nodes, 329 directed post-build edges, no
+self-loops, exact duplicate edges, or same-endpoint relation groups.
