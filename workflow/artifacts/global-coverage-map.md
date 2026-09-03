@@ -9,5 +9,6 @@
 | Public consumer contract | High | External-package compile, unit | `public_api_test.go` | None |
 | Readiness verification | High | Unit, PostgreSQL integration | `verify_test.go`, coordinator integration | None after PGM-04 evidence |
 
-Implementation tests above now live under `pkg/migration/`; the root
-`public_api_test.go` imports that canonical package.
+Implementation and outside-package tests above now live under
+`pkg/migration/`; `pkg/migration/public_api_test.go` imports the canonical
+package exactly as an external consumer does.
