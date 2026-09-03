@@ -1,4 +1,4 @@
-module git.dannyhunn.com/agents/gotth-pg-migrate
+module github.com/gotthboard/gotth-pg-migrate
 
 go 1.26.6
 
