@@ -37,7 +37,7 @@ func TestReleaseVerifierFailsClosed(t *testing.T) {
 		name     string
 		verifier *ReleaseVerifier
 		ctx      context.Context
-		database releaseVerificationQuerier
+		database VerificationQuerier
 		cause    error
 	}{
 		{name: "nil verifier", ctx: context.Background(), database: readyReleaseConnection()},

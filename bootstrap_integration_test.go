@@ -41,13 +41,7 @@ func TestEnsureHistoryTableOnPostgreSQL17(t *testing.T) {
 		drop(cleanupContext)
 	})
 
-	var serverVersion int
-	if err := conn.QueryRow(ctx, "SELECT current_setting('server_version_num')::integer").Scan(&serverVersion); err != nil {
-		t.Fatalf("query PostgreSQL version: %v", err)
-	}
-	if serverVersion != 170010 {
-		t.Fatalf("PostgreSQL server_version_num = %d, want 170010", serverVersion)
-	}
+	requirePostgreSQL17(t, ctx, conn)
 	if err := ensureHistoryTable(ctx, conn); err != nil {
 		t.Fatalf("ensureHistoryTable() first call: %v", err)
 	}

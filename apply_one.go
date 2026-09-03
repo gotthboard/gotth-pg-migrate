@@ -17,7 +17,13 @@ VALUES ($1, $2, $3)`
 	migrationRollbackTimeout = 5 * time.Second
 )
 
-var errNilMigrationTransaction = errors.New("migration begin returned no transaction")
+var (
+	errNilMigrationTransaction = errors.New("migration begin returned no transaction")
+
+	// ErrCommitOutcomeUnknown marks a failed Commit call whose database outcome
+	// cannot be inferred safely. Callers must inspect the ledger before retrying.
+	ErrCommitOutcomeUnknown = errors.New("migration commit outcome is unknown")
+)
 
 type migrationBeginner interface {
 	Begin(context.Context) (pgx.Tx, error)
@@ -79,7 +85,10 @@ func applyMigration(ctx context.Context, beginner migrationBeginner, file migrat
 		return fmt.Errorf("record migration %06d: %w", file.Version, err)
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit migration %06d (outcome unknown; inspect ledger before retry): %w", file.Version, err)
+		return errors.Join(
+			fmt.Errorf("commit migration %06d: %w", file.Version, ErrCommitOutcomeUnknown),
+			err,
+		)
 	}
 	committed = true
 	return nil

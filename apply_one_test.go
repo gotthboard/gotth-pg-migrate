@@ -173,14 +173,15 @@ func TestApplyMigrationRollsBackAndPreservesFailures(t *testing.T) {
 		wantExecs    int
 		wantCommit   bool
 		wantRollback bool
+		wantUnknown  bool
 	}{
 		{name: "begin failure", beginner: &stubMigrationBeginner{err: beginFailure}, wantCause: beginFailure},
 		{name: "nil transaction", beginner: &stubMigrationBeginner{}, wantCause: errNilMigrationTransaction},
 		{name: "migration SQL failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{execErrors: []error{sqlFailure}}}, wantCause: sqlFailure, wantExecs: 1, wantRollback: true},
 		{name: "record failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{execErrors: []error{nil, recordFailure}}}, wantCause: recordFailure, wantExecs: 2, wantRollback: true},
-		{name: "commit failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{commitErr: commitFailure, rollbackErr: pgx.ErrTxClosed}}, wantCause: commitFailure, wantExecs: 2, wantCommit: true, wantRollback: true},
+		{name: "commit failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{commitErr: commitFailure, rollbackErr: pgx.ErrTxClosed}}, wantCause: commitFailure, wantExecs: 2, wantCommit: true, wantRollback: true, wantUnknown: true},
 		{name: "SQL and rollback failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{execErrors: []error{sqlFailure}, rollbackErr: rollbackFailure}}, wantCause: sqlFailure, wantSecond: rollbackFailure, wantExecs: 1, wantRollback: true},
-		{name: "commit and rollback failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{commitErr: commitFailure, rollbackErr: rollbackFailure}}, wantCause: commitFailure, wantSecond: rollbackFailure, wantExecs: 2, wantCommit: true, wantRollback: true},
+		{name: "commit and rollback failure", beginner: &stubMigrationBeginner{tx: &stubMigrationTx{commitErr: commitFailure, rollbackErr: rollbackFailure}}, wantCause: commitFailure, wantSecond: rollbackFailure, wantExecs: 2, wantCommit: true, wantRollback: true, wantUnknown: true},
 	}
 	for _, test := range tests {
 		test := test
@@ -192,6 +193,9 @@ func TestApplyMigrationRollsBackAndPreservesFailures(t *testing.T) {
 			}
 			if test.wantSecond != nil && !errors.Is(err, test.wantSecond) {
 				t.Fatalf("applyMigration() error = %v, want second cause %v", err, test.wantSecond)
+			}
+			if errors.Is(err, ErrCommitOutcomeUnknown) != test.wantUnknown {
+				t.Fatalf("applyMigration() unknown outcome = %t, want %t", errors.Is(err, ErrCommitOutcomeUnknown), test.wantUnknown)
 			}
 			tx, _ := test.beginner.tx.(*stubMigrationTx)
 			if tx == nil {

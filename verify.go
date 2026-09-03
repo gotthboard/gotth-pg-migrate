@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+
+	"github.com/jackc/pgx/v5"
 )
 
 // ReleaseVerifier owns the validated, hashed migration set compiled into one
@@ -13,9 +15,11 @@ type ReleaseVerifier struct {
 	files []migrationFile
 }
 
-type releaseVerificationQuerier interface {
-	migrationRowQuerier
-	appliedMigrationQuerier
+// VerificationQuerier is the minimal read-only PostgreSQL surface required by
+// ReleaseVerifier. Both pgx.Conn and pgxpool.Pool satisfy it.
+type VerificationQuerier interface {
+	QueryRow(context.Context, string, ...any) pgx.Row
+	Query(context.Context, string, ...any) (pgx.Rows, error)
 }
 
 // NewReleaseVerifier validates and hashes an immutable release migration set
@@ -39,7 +43,7 @@ func NewReleaseVerifier(filesystem fs.FS) (*ReleaseVerifier, error) {
 // Complexity: for release size f, applied rows a, catalog cost C, and query
 // cost Q(a), time is O(C+Q(a)+a), Omega(a), with no tighter bound because the
 // database is external. Auxiliary space is Theta(a).
-func (verifier *ReleaseVerifier) Verify(ctx context.Context, querier releaseVerificationQuerier) error {
+func (verifier *ReleaseVerifier) Verify(ctx context.Context, querier VerificationQuerier) error {
 	if verifier == nil || len(verifier.files) == 0 {
 		return fmt.Errorf("migration release verifier is required")
 	}
