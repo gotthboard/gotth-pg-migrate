@@ -50,7 +50,8 @@ commit `47c3a17d8b147e648ad8c57fbc80cec06076e89b`.
 
 ## Installation, compatibility, and support
 
-Unreleased. The Go API is pre-1.0 and its current runtime compatibility target is PostgreSQL 17.
+Unreleased. The Go API is pre-1.0 and its current runtime compatibility target
+is PostgreSQL 17.
 
 No post-migration version has been tagged. To inspect the current source
 before the first admitted release:
