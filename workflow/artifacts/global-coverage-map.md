@@ -8,3 +8,6 @@
 | Transaction application | Critical | Unit, PostgreSQL integration | `apply_one*_test.go` | None |
 | Public consumer contract | High | External-package compile, unit | `public_api_test.go` | None |
 | Readiness verification | High | Unit, PostgreSQL integration | `verify_test.go`, coordinator integration | None after PGM-04 evidence |
+
+Implementation tests above now live under `pkg/migration/`; the root
+`public_api_test.go` imports that canonical package.

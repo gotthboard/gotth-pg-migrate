@@ -30,3 +30,15 @@ The library must pass unit, race, drift, malformed-ledger, cancellation,
 concurrency, and PostgreSQL 17 integration tests. Applications remain the sole
 owners of migration SQL and rollout/rollback decisions. A consumer-package
 test must compile against only the exported API.
+
+## Alpha.3 admission requirements
+
+- `PGM-A3-01`: New consumers import the documented `pkg/migration` package.
+- `PGM-A3-02`: Exactly one public Go package exists, and its
+  `ErrCommitOutcomeUnknown` sentinel retains exact identity.
+- `PGM-A3-03`: Implementation, docs, workflow, integration, and evidence trees
+  remain mechanically distinct.
+- `PGM-A3-04`: Verification includes PostgreSQL 17 boundaries, clean-clone
+  tests, canonical external-consumer compilation, and two clean Judge passes.
+- `PGM-A3-05`: No layout work changes ledger bytes, advisory-lock identity,
+  transaction semantics, or unknown-commit behavior.

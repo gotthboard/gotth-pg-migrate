@@ -6,9 +6,35 @@ Released sections use Semantic Versioning; unreleased work remains under
 
 ## Unreleased
 
-### 2026-09-03 00:42 CDT — Establish GitHub public distribution
+### 2026-09-03 01:04 CDT — Structure and formally admit the alpha.3 library
 
 Commit: current commit; hash assigned by Git after commit
+
+Affected files:
+
+- `pkg/migration/`
+- canonical outside-consumer public API test
+- `README.md`, `docs/`, `workflow.toml`, and admission evidence
+
+Explanation:
+
+Move the sole public migration implementation and tests out of the repository
+root, leave the root for governance, and add formal traceability, runtime,
+performance, review, and workflow records.
+
+Verification:
+
+- preliminary `go test ./...` passed after the move
+- final unit, race, PostgreSQL 17, clean-clone, graph, and Judge evidence is in
+  the admission workflow evidence
+
+Risks / non-goals:
+
+- no migration SQL, database, ledger, lock identity, tag, or rollout changed
+
+### 2026-09-03 00:42 CDT — Establish GitHub public distribution
+
+Commit: `3620b90`
 
 Affected files:
 

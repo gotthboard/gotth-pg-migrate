@@ -11,6 +11,17 @@ set, serializes application with a session advisory lock, attests its ledger,
 rejects drift, applies each file atomically with its ledger record, and refuses
 to guess after an unknown commit outcome.
 
+Canonical Go package:
+`github.com/gotthboard/gotth-pg-migrate/pkg/migration`. The module root
+contains repository governance only. New consumers use the canonical package.
+
+Repository layout:
+
+- `pkg/migration/` — public implementation plus unit and PostgreSQL tests;
+- module root — module metadata and repository governance;
+- `docs/` — requirements, runtime contracts, and admission records;
+- `workflow/` — canonical feature state, review, and evidence.
+
 The library owns no application schema and has no ORM, daemon, down-migration,
 or configuration framework. Applications pass a parsed `pgx.ConnConfig` and an
 `fs.FS` containing files named `000001_description.sql`.

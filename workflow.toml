@@ -1,7 +1,7 @@
 schema_version = 1
 project = "gotth-pg-migrate"
 profile = "strict"
-active = "github-distribution"
+active = "alpha3-library-admission"
 
 [settings]
 worktree_root = "worktrees"
@@ -191,4 +191,50 @@ required = true
 timeout_seconds = 300
 side_effect = "external_read"
 network = true
+retries = 0
+
+[feature.alpha3-library-admission]
+id = "alpha3-library-admission"
+slug = "alpha3-library-admission"
+name = "Formally admit the structured alpha.3 library"
+namespace = "migration"
+parent = ""
+state = "in_progress"
+risk = "critical"
+assurance = "traceable-tests"
+created_at = "2026-09-03T06:04:51Z"
+activated_at = "2026-09-03T06:04:51Z"
+updated_at = "2026-09-03T06:04:51Z"
+folder = "workflow/features/alpha3-library-admission"
+source_path = "pkg/migration"
+worktree = "/tmp/gotth-pg-migrate-coding-setup"
+branch = "feature/openclaw-coding-setup-admission"
+scope = ["Single canonical public-package layout", "Governance-only module root", "Coding-setup traceability, runtime, performance, review, and evidence"]
+non_goals = ["Change migration SQL, ledger, lock identity, transaction semantics, or a live database", "Tag before consumer admission"]
+affected_files = ["*.go", "pkg/migration/**", "README.md", "docs/**", "workflow.toml", "workflow/**"]
+invariants = ["Existing ledger and lock identity remain byte-compatible", "Unknown commit outcomes remain exact sentinels", "No database is mutated outside disposable integration"]
+acceptance = ["Canonical consumer, PostgreSQL 17, format, vet, race, clean-clone, graph, and two independent Judge gates pass"]
+
+[[feature.alpha3-library-admission.dependency]]
+id = "github-distribution"
+type = "prerequisite"
+state = "satisfied"
+evidence = "workflow/features/github-distribution/evidence/verification.md"
+source_commit = "8d18b4fd5a362b5ac9c940f85c4eb94b021192cc"
+satisfied_at = "2026-09-03T06:30:00Z"
+
+[feature.alpha3-library-admission.rollback]
+strategy = "revert_admission_commit"
+notes = "No tag or consumer pin exists; revert the structural admission commit"
+data_loss_risk = false
+requires_migration_down = false
+
+[[feature.alpha3-library-admission.verification]]
+id = "verify"
+kind = "unit-integration"
+command = "make verify && make verify-integration against disposable PostgreSQL 17"
+required = true
+timeout_seconds = 1200
+side_effect = "local_write"
+network = false
 retries = 0

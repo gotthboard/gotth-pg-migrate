@@ -1,5 +1,8 @@
 # Architecture
 
+The canonical public implementation lives in `pkg/migration`. The module root
+contains no Go package; its job is repository governance and module metadata.
+
 The public boundary consists of `Apply`, `ReleaseVerifier`, the minimal
 `VerificationQuerier` interface, and `ErrCommitOutcomeUnknown`. `Apply` owns one
 dedicated `pgx.Conn`, loads and hashes the supplied `fs.FS`, acquires the fixed

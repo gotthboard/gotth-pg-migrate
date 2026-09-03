@@ -1,5 +1,10 @@
 # Implementation specification
 
+- Canonical package:
+  `github.com/gotthboard/gotth-pg-migrate/pkg/migration`.
+- The module root contains no Go package. `pkg/migration` is the only public Go
+  implementation and import path.
+
 - Migration filenames match `^[0-9]{6}_[a-z0-9]+(?:_[a-z0-9]+)*\.sql$` and are
   contiguous from version one.
 - The migration filesystem is flat, nonempty, and bounded to one MiB per file.

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	migration "github.com/gotthboard/gotth-pg-migrate"
+	migration "github.com/gotthboard/gotth-pg-migrate/pkg/migration"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

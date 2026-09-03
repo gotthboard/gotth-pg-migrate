@@ -8,6 +8,9 @@
    PostgreSQL 17 verification, and clean-checkout evidence.
 5. `PGM-05` — first real consumer pin and tagged release; owned by the consumer
    integration, not fabricated inside this library repository.
+6. `PGM-06` — alpha.3 coding-setup admission: canonical package layout,
+   requirement/runtime/performance records, clean-clone verification, and two
+   clean Judge passes before the consumer pin.
 
 Each feature requires scoped tests, race verification, coverage evidence, and
 an explicit compatibility ruling. Application migration files never enter this
