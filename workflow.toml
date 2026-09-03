@@ -1,7 +1,7 @@
 schema_version = 1
 project = "gotth-pg-migrate"
 profile = "strict"
-active = "extraction"
+active = "reusable-v0-admission"
 
 [settings]
 worktree_root = "worktrees"
@@ -53,6 +53,68 @@ requires_migration_down = false
 id = "verify"
 kind = "unit"
 command = "make verify"
+required = true
+timeout_seconds = 600
+side_effect = "local_write"
+network = false
+retries = 0
+
+[feature.reusable-v0-admission]
+id = "reusable-v0-admission"
+slug = "reusable-v0-admission"
+name = "Admit the reusable PostgreSQL migration contract"
+namespace = "migration"
+parent = ""
+state = "in_progress"
+risk = "high"
+assurance = "traceable-tests"
+created_at = "2026-09-03T01:04:42Z"
+activated_at = "2026-09-03T01:04:42Z"
+updated_at = "2026-09-03T01:04:42Z"
+completed_at = ""
+folder = "workflow/features/reusable-v0-admission"
+worktree = "."
+branch = "feature/reusable-v0-admission"
+scope = ["Export the readiness seam", "Classify unknown commit outcomes", "Verify the external API and PostgreSQL 17 contract", "Record clean reusable-release evidence"]
+non_goals = ["Configure multiple migration histories per database", "Change the alpha.2 ledger or advisory lock", "Own consumer SQL, rollout, backup, or rollback", "Tag before a consumer pin is approved"]
+affected_files = ["README.md", "*.go", "docs/**", "Makefile", "workflow.toml", "workflow/features/reusable-v0-admission/**", "workflow/artifacts/global-coverage-map.md"]
+invariants = ["Existing GOTTH ledger bytes and lock identity remain compatible", "Commit failures are never retried", "Readiness performs no writes", "Migration SQL remains consumer-owned"]
+acceptance = ["External consumers can name the readiness interface and detect unknown commit outcome with errors.Is", "Every PostgreSQL 17 patch is accepted by the integration harness", "Local, race-repeated, disposable-database, clean-clone, and graph gates pass"]
+
+[[feature.reusable-v0-admission.dependency]]
+id = "extraction"
+type = "prerequisite"
+state = "satisfied"
+evidence = "workflow/features/extraction/evidence/verification.md"
+satisfied_at = "2026-09-03T01:04:42Z"
+source_commit = "6d29ff5392e69e7f772a896d487bd50bc6b1e081"
+
+[feature.reusable-v0-admission.rollback]
+strategy = "revert_feature_commit"
+notes = "No tag or consumer pin exists; revert the admission commit"
+data_loss_risk = false
+requires_migration_down = false
+
+[[feature.reusable-v0-admission.interface]]
+name = "Go library API"
+kind = "api"
+stability = "unstable-unreleased"
+change = "additive"
+
+[[feature.reusable-v0-admission.verification]]
+id = "local"
+kind = "unit"
+command = "make verify"
+required = true
+timeout_seconds = 600
+side_effect = "local_write"
+network = false
+retries = 0
+
+[[feature.reusable-v0-admission.verification]]
+id = "postgresql-17"
+kind = "integration"
+command = "make verify-integration"
 required = true
 timeout_seconds = 600
 side_effect = "local_write"

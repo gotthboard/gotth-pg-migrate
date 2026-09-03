@@ -11,7 +11,12 @@
 - A migration transaction executes the exact SQL string, inserts its digest,
   commits once, and otherwise performs bounded rollback.
 - `ReleaseVerifier` hashes files once and performs read-only exact-head checks.
+- `VerificationQuerier` names only the `Query` and `QueryRow` methods needed by
+  readiness and is satisfied by direct pgx connections and pools.
+- Every transaction commit failure wraps `ErrCommitOutcomeUnknown`; execution,
+  ledger-insert, and rollback failures do not.
 - Public functions reject nil and canceled inputs before external work.
 
-PostgreSQL 17 is the initial verified contract. Changes to ledger shape,
+Every PostgreSQL 17 patch release is within the initial verified contract;
+major-version expansion requires its own catalog integration evidence. Changes to ledger shape,
 filename grammar, advisory lock identity, or failure semantics are breaking.

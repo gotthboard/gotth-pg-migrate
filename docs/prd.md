@@ -13,6 +13,8 @@ Copying ad hoc migration runners between products produces silent divergence.
 - Serialize migrators using one dedicated PostgreSQL session lock.
 - Keep each migration and its ledger row in one transaction.
 - Verify readiness against an exact compiled release without writes.
+- Expose a nameable readiness interface and a machine-detectable unknown-commit
+  outcome so external consumers never parse error strings.
 - Bound files, rows, connections, cleanup, and failure output.
 
 ## Non-goals
@@ -26,4 +28,5 @@ Copying ad hoc migration runners between products produces silent divergence.
 
 The library must pass unit, race, drift, malformed-ledger, cancellation,
 concurrency, and PostgreSQL 17 integration tests. Applications remain the sole
-owners of migration SQL and rollout/rollback decisions.
+owners of migration SQL and rollout/rollback decisions. A consumer-package
+test must compile against only the exported API.
