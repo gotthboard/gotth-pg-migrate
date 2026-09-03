@@ -1,6 +1,6 @@
 # GitHub Distribution Verification
 
-Status: candidate verification complete
+Status: complete
 
 ## Identity and scope
 
@@ -29,23 +29,32 @@ development, issue, contribution, and security-reporting endpoints are stated.
   `v0.0.0-20260903060720-430659d47a12`.
 - Complete Forgejo and GitHub advertised head/tag ref sets matched after the
   candidate push.
+- A fresh public GitHub `main` clone resolved
+  `8d18b4fd5a362b5ac9c940f85c4eb94b021192cc`, produced no `go mod tidy` drift, and passed
+  `go test -mod=readonly ./...`.
+- Fresh external consumers resolved `@main` through direct VCS and
+  `https://proxy.golang.org,direct`, then compiled at
+  `v0.0.0-20260903062630-8d18b4fd5a36`.
 
 The slash-containing feature ref is accepted by direct VCS resolution but is
-not a legal version query for the module proxy. The proxy lane therefore used
-the exact pseudo-version above. Final `@main` resolution is a promotion gate.
+not a legal version query for the module proxy. The pre-promotion proxy lane
+therefore used the exact candidate pseudo-version above; both final `@main`
+lanes passed after promotion.
 
 ## Impact graph
 
 Graphify recorded 215 nodes / 484 edges at implementation commit. Graph SHA-256:
-`ec278a9cf19e5e115ac1fd2ec30e2ab9b9f788503136e37f7993a13a650624ed`. Subsequent commits before this record changed documentation
-only. The merged suite graph had 4,116 nodes and 11,415 edges, with no
+`ec278a9cf19e5e115ac1fd2ec30e2ab9b9f788503136e37f7993a13a650624ed`.
+Subsequent commits before this record changed documentation only. The merged
+suite graph had 4,116 nodes and 11,415 edges, with no
 cross-repository module dependency edge.
 
 ## Admission and residual gates
 
-Two cold Judge passes review the completed candidate tree before this evidence
-is committed. No performance benchmark applies because executable paths and
-data flow are unchanged.
+Two cold Judge passes reviewed the completed candidate before promotion. This
+completion update changes evidence and workflow state only and receives two
+fresh cold passes before commit. No performance benchmark applies because
+executable paths and data flow are unchanged.
 
 No license was selected. Release tags remain blocked until Danny closes that
 decision gate. GitHub metadata mutation lacks authentication. Forgejo is still
