@@ -25,7 +25,9 @@ first_line() {
 }
 
 [[ "$BASH_VERSION" == "$expected_bash" ]] || { echo "Bash $expected_bash is required" >&2; exit 1; }
-[[ "$(go env GOVERSION)" == "$expected_go" ]] || { echo "Go $expected_go is required" >&2; exit 1; }
+selected_go_root=$(go env GOROOT)
+[[ "$("$selected_go_root/bin/go" env GOVERSION)" == "$expected_go" ]] || { echo "Go $expected_go is required" >&2; exit 1; }
+export PATH="$selected_go_root/bin:$PATH" GOTOOLCHAIN=local
 [[ "$(git --version)" == "$expected_git" ]] || { echo "$expected_git is required" >&2; exit 1; }
 [[ "$(first_line tar --version)" == "$expected_tar" ]] || { echo "$expected_tar is required" >&2; exit 1; }
 [[ "$(first_line gzip --version)" == "$expected_gzip" ]] || { echo "$expected_gzip is required" >&2; exit 1; }
@@ -65,9 +67,10 @@ git --git-dir="$source_git" fetch -q --no-tags "$repo_root" "$commit"
 committed_script_sha=$(git --git-dir="$source_git" show "$commit:scripts/build-release-candidate.sh" | sha256sum | awk '{print $1}')
 [[ "$running_script_sha" == "$committed_script_sha" ]] || { echo "executing builder does not match COMMIT" >&2; exit 1; }
 cleanup() {
-  rm -rf "$root"
+  chmod -R u+w "$root" 2>/dev/null || true
+  rm -rf "$root" || true
   if [[ -n "$publish_stage" ]]; then
-    rm -rf "$publish_stage"
+    rm -rf "$publish_stage" || true
   fi
 }
 trap cleanup EXIT
