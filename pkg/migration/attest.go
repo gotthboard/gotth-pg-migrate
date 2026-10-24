@@ -50,6 +50,7 @@ SELECT
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
           AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
+          AND NOT attribute.atthasmissing AND attribute.attmissingval IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -67,6 +68,7 @@ SELECT
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
           AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
+          AND NOT attribute.atthasmissing AND attribute.attmissingval IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -84,6 +86,7 @@ SELECT
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
           AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
+          AND NOT attribute.atthasmissing AND attribute.attmissingval IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -101,6 +104,7 @@ SELECT
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
           AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
+          AND NOT attribute.atthasmissing AND attribute.attmissingval IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
