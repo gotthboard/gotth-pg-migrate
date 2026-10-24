@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export LC_ALL=C GOFLAGS= GOWORK=off GOENV=off
+export LC_ALL=C GOFLAGS= GOWORK=off GOENV=off GIT_NO_REPLACE_OBJECTS=1 GIT_ATTR_NOSYSTEM=1
 umask 0022
 version=v1.0.0
 repo=github.com/gotthboard/gotth-pg-migrate
@@ -42,10 +42,9 @@ commit=$2
 [[ "$(git rev-parse "$commit^{commit}")" == "$commit" ]] || { echo "COMMIT does not identify the exact commit" >&2; exit 1; }
 [[ "$(git rev-parse HEAD)" == "$commit" ]] || { echo "HEAD must equal COMMIT so the executed builder is attested" >&2; exit 1; }
 [[ -z "$(git status --short)" ]] || { echo "release worktree must be clean" >&2; exit 1; }
+repo_root=$(git rev-parse --show-toplevel)
 running_script=$(realpath "${BASH_SOURCE[0]}")
 running_script_sha=$(sha256sum "$running_script" | awk '{print $1}')
-committed_script_sha=$(git show "$commit:scripts/build-release-candidate.sh" | sha256sum | awk '{print $1}')
-[[ "$running_script_sha" == "$committed_script_sha" ]] || { echo "executing builder does not match COMMIT" >&2; exit 1; }
 
 out_parent=$(dirname "$requested_out")
 out_name=$(basename "$requested_out")
@@ -55,6 +54,12 @@ final_out="$out_parent/$out_name"
 [[ ! -e "$final_out" ]] || { echo "OUTPUT_DIRECTORY must not already exist" >&2; exit 1; }
 publish_stage=$(mktemp -d "$out_parent/.${out_name}.tmp.XXXXXX")
 root=$(mktemp -d)
+source_git="$root/source.git"
+git init --bare -q "$source_git"
+git --git-dir="$source_git" fetch -q --no-tags "$repo_root" "$commit"
+[[ "$(git --git-dir="$source_git" rev-parse FETCH_HEAD)" == "$commit" ]] || { echo "isolated source fetch did not preserve COMMIT" >&2; exit 1; }
+committed_script_sha=$(git --git-dir="$source_git" show "$commit:scripts/build-release-candidate.sh" | sha256sum | awk '{print $1}')
+[[ "$running_script_sha" == "$committed_script_sha" ]] || { echo "executing builder does not match COMMIT" >&2; exit 1; }
 cleanup() {
   rm -rf "$root"
   if [[ -n "$publish_stage" ]]; then
@@ -69,12 +74,12 @@ source_dir="$root/gotth-pg-migrate-$version"
 mkdir -p "$stage" "$source_dir"
 archive="gotth-pg-migrate-$version-source.tar.gz"
 metadata="gotth-pg-migrate-$version-metadata.tar.gz"
-epoch=$(git show -s --format=%ct "$commit")
+epoch=$(git --git-dir="$source_git" show -s --format=%ct "$commit")
 created=$(date -u -d "@$epoch" '+%Y-%m-%dT%H:%M:%SZ')
 
-git -c tar.umask=0022 archive --format=tar --prefix="gotth-pg-migrate-$version/" --output="$root/source.tar" "$commit"
+git --git-dir="$source_git" -c core.attributesFile=/dev/null -c tar.umask=0022 archive --format=tar --prefix="gotth-pg-migrate-$version/" --output="$root/source.tar" "$commit"
 gzip -n -9 -c "$root/source.tar" >"$out/$archive"
-git -c tar.umask=0022 archive --format=tar --output="$root/source-tree.tar" "$commit"
+git --git-dir="$source_git" -c core.attributesFile=/dev/null -c tar.umask=0022 archive --format=tar --output="$root/source-tree.tar" "$commit"
 tar -xf "$root/source-tree.tar" -C "$source_dir"
 source_sha=$(sha256sum "$out/$archive" | awk '{print $1}')
 printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
@@ -190,6 +195,7 @@ gzip -n -9 -c "$root/metadata.tar" >"$out/$metadata"
   chmod 0644 "$archive" "$metadata" SHA256SUMS
 )
 chmod 0755 "$publish_stage"
-mv "$publish_stage" "$final_out"
+mv --no-clobber --no-target-directory "$publish_stage" "$final_out"
+[[ ! -e "$publish_stage" && -f "$final_out/$archive" && -f "$final_out/$metadata" && -f "$final_out/SHA256SUMS" ]] || { echo "OUTPUT_DIRECTORY appeared during publication" >&2; exit 1; }
 publish_stage=
 printf 'commit=%s\nsource=%s\nmetadata=%s\n' "$commit" "$final_out/$archive" "$final_out/$metadata"
