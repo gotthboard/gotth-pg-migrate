@@ -6,8 +6,10 @@ not a compiled binary.
 `scripts/build-release-candidate.sh` accepts one clean full commit, requires
 that commit to equal `HEAD`, disables Git replacement objects, and requires the
 executing script bytes to match the script in that commit. It fetches the raw
-commit into a fresh bare repository before archiving, so ambient repository,
-global, and system attributes cannot change release bytes. It emits:
+commit into a fresh bare repository with an explicit empty template before
+archiving, so ambient repository, replacement objects, templates, and
+global/system attributes cannot change release bytes. It then compares every
+archived member, mode, and blob ID with the raw commit tree. It emits:
 
 - a deterministic `git archive` source tarball;
 - an SPDX 2.3 module inventory;
@@ -40,12 +42,11 @@ configuration, rejects every declared `go.mod` replacement, and rejects any
 selected dependency replacement. Read-only
 `go list -deps -test` discovers only modules linked by production or test
 packages using fresh isolated module/build caches and the canonical Go proxy and
-sum database. Every inventoried module has complete hashes in committed
-`go.sum`; the builder
+sum database. Network access is therefore required for the release build. Every
+inventoried module has complete hashes in committed `go.sum`; the builder
 rejects any discovery-time `go.sum` change and runs `go mod verify` before
-reading legal files from the cache. The network is not a source of unrecorded
-release bytes. Offline builds are supported with a complete verified cache. The
-workflow therefore marks the artifact gate as network-capable, not network-free.
+reading legal files from the cache. Downloaded module bytes are bound by those
+committed sums. The workflow therefore marks the artifact gate as networked.
 
 The provenance is an in-toto Statement v1 with a project-specific deterministic
 predicate. It records source commit/time, source archive digest, release-script

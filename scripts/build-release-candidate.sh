@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 export LC_ALL=C GOFLAGS= GOWORK=off GOENV=off GIT_NO_REPLACE_OBJECTS=1 GIT_ATTR_NOSYSTEM=1
 export TAR_OPTIONS= GZIP= GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org GOPRIVATE= GONOSUMDB=
+export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR GIT_TEMPLATE_DIR
 umask 0022
 version=v1.0.0
 repo=github.com/gotthboard/gotth-pg-migrate
@@ -60,8 +62,10 @@ final_out="$out_parent/$out_name"
 publish_stage=$(mktemp -d "$out_parent/.${out_name}.tmp.XXXXXX")
 root=$(mktemp -d)
 source_git="$root/source.git"
+empty_git_template="$root/empty-git-template"
+mkdir -p "$empty_git_template"
 export GOMODCACHE="$root/gomodcache" GOCACHE="$root/gocache"
-git init --bare -q "$source_git"
+git init --bare -q --template="$empty_git_template" "$source_git"
 git --git-dir="$source_git" fetch -q --no-tags "$repo_root" "$commit"
 [[ "$(git --git-dir="$source_git" rev-parse FETCH_HEAD)" == "$commit" ]] || { echo "isolated source fetch did not preserve COMMIT" >&2; exit 1; }
 committed_script_sha=$(git --git-dir="$source_git" show "$commit:scripts/build-release-candidate.sh" | sha256sum | awk '{print $1}')
@@ -88,6 +92,31 @@ git --git-dir="$source_git" -c core.attributesFile=/dev/null -c tar.umask=0022 a
 gzip -n -9 -c "$root/source.tar" >"$out/$archive"
 git --git-dir="$source_git" -c core.attributesFile=/dev/null -c tar.umask=0022 archive --format=tar --output="$root/source-tree.tar" "$commit"
 tar -xf "$root/source-tree.tar" -C "$source_dir"
+git --git-dir="$source_git" ls-tree -rz "$commit" >"$root/source-tree.list"
+tree_entry_count=0
+while IFS= read -r -d '' entry; do
+  metadata=${entry%%$'\t'*}
+  path=${entry#*$'\t'}
+  read -r mode object_type object_id <<<"$metadata"
+  [[ "$object_type" == blob ]] || { echo "source tree contains unsupported object type: $path" >&2; exit 1; }
+  case "$mode" in
+    100644) [[ -f "$source_dir/$path" && ! -L "$source_dir/$path" && ! -x "$source_dir/$path" ]] || { echo "source mode mismatch: $path" >&2; exit 1; } ;;
+    100755) [[ -f "$source_dir/$path" && ! -L "$source_dir/$path" && -x "$source_dir/$path" ]] || { echo "source mode mismatch: $path" >&2; exit 1; } ;;
+    120000) [[ -L "$source_dir/$path" ]] || { echo "source symlink mismatch: $path" >&2; exit 1; } ;;
+    *) echo "unsupported source mode $mode: $path" >&2; exit 1 ;;
+  esac
+  if [[ "$mode" == 120000 ]]; then
+    actual_id=$(readlink "$source_dir/$path" | git --git-dir="$source_git" hash-object --stdin)
+  else
+    actual_id=$(git --git-dir="$source_git" hash-object "$source_dir/$path")
+  fi
+  [[ "$actual_id" == "$object_id" ]] || { echo "source content mismatch: $path" >&2; exit 1; }
+  tree_entry_count=$((tree_entry_count + 1))
+done <"$root/source-tree.list"
+find "$source_dir" \( -type f -o -type l \) -print0 >"$root/source-files.list"
+source_entry_count=0
+while IFS= read -r -d '' _; do source_entry_count=$((source_entry_count + 1)); done <"$root/source-files.list"
+[[ "$source_entry_count" -eq "$tree_entry_count" ]] || { echo "source archive member count does not match COMMIT" >&2; exit 1; }
 source_sha=$(sha256sum "$out/$archive" | awk '{print $1}')
 printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
 
