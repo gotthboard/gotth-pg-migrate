@@ -50,6 +50,8 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		"extra index":               "CREATE INDEX gotth_schema_migrations_name_idx ON public.gotth_schema_migrations (name)",
 		"timestamp precision":       "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN applied_at TYPE pg_catalog.timestamptz(0)",
 		"text collation":            "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN name TYPE pg_catalog.text COLLATE \"C\"",
+		"dropped column residue":    "ALTER TABLE public.gotth_schema_migrations ADD COLUMN residue pg_catalog.text; ALTER TABLE public.gotth_schema_migrations DROP COLUMN residue",
+		"primary index options":     "ALTER INDEX public.gotth_schema_migrations_pkey SET (fillfactor=50)",
 	}
 	for name, statement := range drifts {
 		name, statement := name, statement

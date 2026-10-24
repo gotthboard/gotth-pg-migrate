@@ -35,4 +35,7 @@ func TestApplyRejectsNilPublicInputs(t *testing.T) {
 	if err := Apply(context.Background(), nil, coordinatorMigrationFS()); err == nil {
 		t.Fatal("Apply(nil config) returned nil error")
 	}
+	if err := Apply(context.Background(), &pgx.ConnConfig{}, nil); err == nil {
+		t.Fatal("Apply(nil filesystem) returned nil error")
+	}
 }

@@ -34,6 +34,9 @@ func applyWithConnector(ctx context.Context, configured *pgx.ConnConfig, filesys
 	if configured == nil {
 		return fmt.Errorf("migration connection configuration is required")
 	}
+	if filesystem == nil {
+		return fmt.Errorf("migration filesystem is required")
+	}
 	if connector == nil {
 		return fmt.Errorf("migration connector is required")
 	}

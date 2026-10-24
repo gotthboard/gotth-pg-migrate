@@ -23,7 +23,7 @@ SELECT
     AND (SELECT pg_catalog.count(*) OPERATOR(pg_catalog.=) 4
          FROM pg_catalog.pg_attribute AS attribute
          JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
-         WHERE attribute.attnum OPERATOR(pg_catalog.>) 0 AND NOT attribute.attisdropped)
+         WHERE attribute.attnum OPERATOR(pg_catalog.>) 0)
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_attribute AS attribute JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
         WHERE attribute.attnum OPERATOR(pg_catalog.=) 1 AND attribute.attname OPERATOR(pg_catalog.=) 'version'
@@ -102,9 +102,16 @@ SELECT
         FROM pg_catalog.pg_constraint AS constraint_value
         JOIN target ON target.oid OPERATOR(pg_catalog.=) constraint_value.conrelid
         JOIN pg_catalog.pg_index AS index_value ON index_value.indexrelid OPERATOR(pg_catalog.=) constraint_value.conindid
+        JOIN pg_catalog.pg_class AS index_class ON index_class.oid OPERATOR(pg_catalog.=) index_value.indexrelid
+        JOIN pg_catalog.pg_am AS access_method ON access_method.oid OPERATOR(pg_catalog.=) index_class.relam
         WHERE constraint_value.conname OPERATOR(pg_catalog.=) 'gotth_schema_migrations_pkey' AND constraint_value.contype OPERATOR(pg_catalog.=) 'p'
           AND constraint_value.convalidated AND index_value.indisprimary AND index_value.indisunique
-          AND index_value.indisvalid AND index_value.indisready
+          AND index_value.indisvalid AND index_value.indisready AND index_value.indimmediate
+          AND NOT index_value.indisclustered AND NOT index_value.indisexclusion AND NOT index_value.indisreplident
+          AND index_value.indnkeyatts OPERATOR(pg_catalog.=) 1 AND index_value.indnatts OPERATOR(pg_catalog.=) 1
+          AND index_value.indexprs IS NULL AND index_value.indpred IS NULL
+          AND access_method.amname OPERATOR(pg_catalog.=) 'btree'
+          AND index_class.reltablespace OPERATOR(pg_catalog.=) 0 AND index_class.reloptions IS NULL
           AND pg_catalog.pg_get_constraintdef(constraint_value.oid, false) OPERATOR(pg_catalog.=) 'PRIMARY KEY (version)')
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_constraint AS constraint_value JOIN target ON target.oid OPERATOR(pg_catalog.=) constraint_value.conrelid

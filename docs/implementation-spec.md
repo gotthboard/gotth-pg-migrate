@@ -9,10 +9,13 @@
   contiguous from version one.
 - The migration filesystem is flat and nonempty, every entry is a regular
   file, and each file is bounded to one MiB.
-- The ledger columns are `version bigint`, `name text`, `sha256 bytea`, and
-  `applied_at timestamptz default clock_timestamp()` with exact constraints.
-- The package attests columns, defaults, constraints, the sole primary-key
-  index, persistence, row-security state, inheritance in either direction, user
+- The ledger has exactly four physical attributes with no dropped-column
+  residue: `version bigint`, `name text`, `sha256 bytea`, and `applied_at
+  timestamptz default clock_timestamp()` with exact modifiers, collations, and
+  constraints.
+- The package attests columns, defaults, constraints, the sole btree
+  primary-key index with default tablespace and no relation options, persistence,
+  row-security state, inheritance in either direction, user
   triggers, rewrite rules, and expression dependencies before trusting rows.
 - Applied history is read from `ONLY public.gotth_schema_migrations` with a
   bound of release length plus one; the ledger may have no inheritance edge in
