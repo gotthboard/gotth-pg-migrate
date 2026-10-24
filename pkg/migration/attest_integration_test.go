@@ -28,7 +28,7 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		}
 	})
 	drop := func(ctx context.Context) {
-		if _, err := conn.Exec(ctx, "DROP TABLE IF EXISTS public.gotth_schema_migrations CASCADE"); err != nil {
+		if _, err := conn.Exec(ctx, "DROP TABLE IF EXISTS public.gotth_schema_migrations CASCADE; DROP TYPE IF EXISTS public.gotth_ledger_type CASCADE"); err != nil {
 			t.Fatalf("drop history table: %v", err)
 		}
 	}
@@ -54,6 +54,9 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		"primary index options":     "ALTER INDEX public.gotth_schema_migrations_pkey SET (fillfactor=50)",
 		"table options":             "ALTER TABLE public.gotth_schema_migrations SET (fillfactor=50)",
 		"replica identity":          "ALTER TABLE public.gotth_schema_migrations REPLICA IDENTITY NOTHING",
+		"typed table":               "CREATE TYPE public.gotth_ledger_type AS (version pg_catalog.int8, name pg_catalog.text, sha256 pg_catalog.bytea, applied_at pg_catalog.timestamptz); ALTER TABLE public.gotth_schema_migrations OF public.gotth_ledger_type",
+		"column storage":            "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN name SET STORAGE EXTERNAL",
+		"column compression":        "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN sha256 SET COMPRESSION pglz",
 	}
 	for name, statement := range drifts {
 		name, statement := name, statement

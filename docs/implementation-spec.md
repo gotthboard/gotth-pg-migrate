@@ -11,8 +11,9 @@
   file, and each file is bounded to one MiB.
 - The ledger has exactly four physical attributes with no dropped-column
   residue: `version bigint`, `name text`, `sha256 bytea`, and `applied_at
-  timestamptz default clock_timestamp()` with exact modifiers, collations, and
-  constraints.
+  timestamptz default clock_timestamp()` with exact modifiers, collations,
+  default storage/compression/statistics state, no typed-table attachment, and
+  exact constraints.
 - The package attests columns, defaults, constraints, heap storage with
   `pg_default` effective tablespace, default replica identity, no table options,
   and the sole btree primary-key index with exact vectors/flags, `pg_default`

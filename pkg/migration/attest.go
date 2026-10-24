@@ -18,6 +18,7 @@ const attestHistoryTableSQL = `WITH target AS (
       AND class.relpersistence OPERATOR(pg_catalog.=) 'p'
       AND table_access_method.amname OPERATOR(pg_catalog.=) 'heap'
       AND class.reloptions IS NULL AND class.relreplident OPERATOR(pg_catalog.=) 'd'
+      AND class.reloftype OPERATOR(pg_catalog.=) 0
       AND NOT class.relispartition
       AND COALESCE(NULLIF(class.reltablespace, 0), (
           SELECT database_value.dattablespace
@@ -44,6 +45,13 @@ SELECT
           AND attribute.attcollation OPERATOR(pg_catalog.=) (
               SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attstorage OPERATOR(pg_catalog.=) (
+              SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attcompression OPERATOR(pg_catalog.=) ''
+          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
+          AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
@@ -54,6 +62,13 @@ SELECT
           AND attribute.attcollation OPERATOR(pg_catalog.=) (
               SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attstorage OPERATOR(pg_catalog.=) (
+              SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attcompression OPERATOR(pg_catalog.=) ''
+          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
+          AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
@@ -64,6 +79,13 @@ SELECT
           AND attribute.attcollation OPERATOR(pg_catalog.=) (
               SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attstorage OPERATOR(pg_catalog.=) (
+              SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attcompression OPERATOR(pg_catalog.=) ''
+          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
+          AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
@@ -74,6 +96,13 @@ SELECT
           AND attribute.attcollation OPERATOR(pg_catalog.=) (
               SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attstorage OPERATOR(pg_catalog.=) (
+              SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attcompression OPERATOR(pg_catalog.=) ''
+          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
+          AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND (SELECT pg_catalog.count(*) OPERATOR(pg_catalog.=) 1
