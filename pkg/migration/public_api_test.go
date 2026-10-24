@@ -1,6 +1,9 @@
 package migration_test
 
 import (
+	"context"
+	"errors"
+	"io/fs"
 	"testing"
 	"testing/fstest"
 
@@ -10,8 +13,12 @@ import (
 )
 
 var (
-	_ migration.VerificationQuerier = (*pgx.Conn)(nil)
-	_ migration.VerificationQuerier = (*pgxpool.Pool)(nil)
+	_ migration.VerificationQuerier                       = (*pgx.Conn)(nil)
+	_ migration.VerificationQuerier                       = (*pgxpool.Pool)(nil)
+	_ func(context.Context, *pgx.ConnConfig, fs.FS) error = migration.Apply
+	_ interface {
+		Verify(context.Context, migration.VerificationQuerier) error
+	} = (*migration.ReleaseVerifier)(nil)
 )
 
 func TestExternalConsumerCanConstructReleaseVerifier(t *testing.T) {
@@ -22,5 +29,8 @@ func TestExternalConsumerCanConstructReleaseVerifier(t *testing.T) {
 	})
 	if err != nil || verifier == nil {
 		t.Fatalf("NewReleaseVerifier() = (%v, %v)", verifier, err)
+	}
+	if migration.ErrCommitOutcomeUnknown == nil || !errors.Is(migration.ErrCommitOutcomeUnknown, migration.ErrCommitOutcomeUnknown) {
+		t.Fatal("ErrCommitOutcomeUnknown lost stable error identity")
 	}
 }

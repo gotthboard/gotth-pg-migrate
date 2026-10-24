@@ -6,6 +6,39 @@ Released sections use Semantic Versioning; unreleased work remains under
 
 ## Unreleased
 
+### 2026-10-24 — Prepare the v1.0.0 release candidate
+
+Affected files:
+
+- public package contract tests and regular-file validation
+- `README.md`, v1 contract, release notes, distribution, and release policy
+- deterministic release-candidate builder
+- workflow and isolated admission records
+
+Explanation:
+
+Freeze the existing migration mechanism as the first stable major contract:
+PostgreSQL 17.x, exact full-history SHA-256 ledger, fixed advisory lock,
+per-file atomic transactions, no dirty flag, fail-closed drift, and one stable
+unknown-commit sentinel. Reject non-regular filesystem entries before reading
+migration bytes. Correct the public import path and state the legacy-lock
+cutover boundary instead of claiming cross-key serialization.
+
+Verification:
+
+- focused local format, module, vet, test, race, and coverage gates
+- isolated PostgreSQL 17 failure, drift, concurrency, and repeat gates
+- external-package compilation and exact Board migration fixture admission
+- deterministic source/metadata rebuild with checksum, SPDX, provenance, and
+  license inspection
+- two independent fresh reviews
+
+Risks / non-goals:
+
+- no Mail, Board, WorldWeave, shared database, migration SQL, push, tag, mirror,
+  hosted Release, or deployment change
+- publication remains pending explicit authorization
+
 ### 2026-09-13 19:05 CDT — Adopt the MIT license
 
 Commit: current commit; hash assigned by Git after commit

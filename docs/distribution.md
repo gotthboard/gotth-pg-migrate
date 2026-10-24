@@ -17,23 +17,25 @@ endpoints.
 
 ## Maturity and compatibility
 
-Current status: unreleased Go library; PostgreSQL 17 is the current compatibility target.
+Current status: local `v1.0.0` candidate, not tagged or published. Its frozen
+database compatibility target is PostgreSQL 17.x.
 
 ## Current source use
 
-No post-migration version has been tagged. Until one is admitted, source users
-must select the moving `main` branch explicitly:
-
-```sh
-go get github.com/gotthboard/gotth-pg-migrate@main
-```
+No stable tag exists yet. The admitted candidate package path is:
 
 ```go
-import migration "github.com/gotthboard/gotth-pg-migrate"
+import migration "github.com/gotthboard/gotth-pg-migrate/pkg/migration"
 ```
 
-A Go command records a pseudo-version in the consumer's `go.mod`; review that
-exact revision. Do not mistake `@main` for a compatibility promise.
+After publication, install it with:
+
+```sh
+go get github.com/gotthboard/gotth-pg-migrate/pkg/migration@v1.0.0
+```
+
+Before publication, an exact candidate commit may be used only for isolated
+admission. Do not mistake the moving `main` branch for the v1 contract.
 
 The repository pins Go 1.26.6 where a Go module exists. Supported protocol,
 runtime, database, and tool versions remain the ones stated in the README and

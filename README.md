@@ -49,9 +49,11 @@ if err == nil {
 The explicit compatibility boundary is PostgreSQL 17, one application-owned
 migration history per database, the fixed
 `public.gotth_schema_migrations` ledger, and the fixed package advisory lock.
-Those constraints prevent two libraries from silently claiming independent
-truth in one database. Migration SQL, grants, rollout, backup, and rollback
-remain consumer-owned.
+Those constraints prevent two library instances from silently claiming
+independent truth in one database. The lock does not serialize legacy migrators that use a
+different key; cutovers require a stopped/drained writer boundary. Migration
+SQL, grants, rollout, backup, and rollback remain consumer-owned. The exact v1
+semantics are frozen in [the version 1 contract](docs/contract-v1.md).
 
 Run `make verify` with the pinned Go toolchain. PostgreSQL integration tests run
 with `make verify-integration` when `GOTTH_PG_MIGRATE_TEST_DATABASE_URL` points
@@ -62,15 +64,16 @@ commit `47c3a17d8b147e648ad8c57fbc80cec06076e89b`.
 
 ## Installation, compatibility, and support
 
-Unreleased. The Go API is pre-1.0 and its current runtime compatibility target
-is PostgreSQL 17.
-
-No post-migration version has been tagged. To inspect the current source
-before the first admitted release:
+The local candidate is `v1.0.0`; no tag or hosted Release has been published.
+Its stable runtime boundary is Go 1.26.6, pgx/v5, and PostgreSQL 17.x. After the
+immutable tag is published, install the sole public package with:
 
 ```sh
-go get github.com/gotthboard/gotth-pg-migrate@main
+go get github.com/gotthboard/gotth-pg-migrate/pkg/migration@v1.0.0
 ```
+
+Until that tag exists, do not treat `main` as the stable release. See the
+[candidate release notes](docs/release-notes-v1.0.0.md).
 
 The owner-authored repository contents are licensed under the
 [MIT License](LICENSE). Third-party dependencies and assets retain their own

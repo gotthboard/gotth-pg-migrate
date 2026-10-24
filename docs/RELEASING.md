@@ -13,16 +13,19 @@ repository uses the MIT license. Reserved placeholders are not tagged at all.
 For an admitted release:
 
 1. Select a version from this repository's actual compatibility change.
-2. Verify an exact clean Forgejo commit with the repository's required gates.
-3. Update `docs/CHANGELOG.md` with the exact version, commit, compatibility
-   effect, verification, and known limitations.
-4. Create and push a new annotated tag on canonical Forgejo. Never move or
-   replace an existing tag.
-5. Verify exact head and tag parity at
-   `github.com/gotthboard/gotth-pg-migrate` through the existing one-way push
-   mirror.
-6. Build any artifacts from the exact public GitHub clone, publish checksums,
-   and create the GitHub release for that already-mirrored tag.
+2. Verify one exact clean candidate commit with every required local, runtime,
+   consumer, and review gate.
+3. Build the source and metadata artifacts twice from that full commit with
+   `scripts/build-release-candidate.sh`; require byte-identical checksums and
+   inspect the SPDX, provenance, owner license, and dependency-license bundle.
+4. Update `docs/CHANGELOG.md` with the version, compatibility effect,
+   verification, and known limitations.
+5. With separate publication authorization, push the candidate and create a new
+   annotated tag on canonical Forgejo. Never move or replace a tag.
+6. Verify exact tag-object and peeled-commit parity at GitHub through the
+   existing one-way mirror.
+7. Rebuild from the exact public tag, require equality with the admitted
+   candidate artifacts, publish `SHA256SUMS`, and create the GitHub Release.
 
 Forgejo remains the development source of truth. GitHub is the public clone,
 Go import, and release-distribution endpoint. Failure of mirror or release

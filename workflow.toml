@@ -1,7 +1,7 @@
 schema_version = 1
 project = "gotth-pg-migrate"
 profile = "strict"
-active = "alpha3-library-admission"
+active = "v1-release"
 
 [settings]
 worktree_root = "worktrees"
@@ -213,7 +213,7 @@ branch = "feature/openclaw-coding-setup-admission"
 scope = ["Single canonical public-package layout", "Governance-only module root", "Coding-setup traceability, runtime, performance, review, and evidence"]
 non_goals = ["Change migration SQL, ledger, lock identity, transaction semantics, or a live database", "Tag before consumer admission"]
 affected_files = ["*.go", "pkg/migration/**", "README.md", "docs/**", "workflow.toml", "workflow/**"]
-invariants = ["Existing ledger and lock identity remain byte-compatible", "Unknown commit outcomes remain exact sentinels", "No database is mutated outside disposable integration"]
+invariants = ["The package ledger and lock identity remain byte-identical through the alpha.3 layout move", "Unknown commit outcomes remain exact sentinels", "No database is mutated outside disposable integration"]
 acceptance = ["Canonical consumer, PostgreSQL 17, format, vet, race, clean-clone, graph, and two independent Judge gates pass"]
 
 [[feature.alpha3-library-admission.dependency]]
@@ -234,6 +234,88 @@ requires_migration_down = false
 id = "verify"
 kind = "unit-integration"
 command = "make verify && make verify-integration against disposable PostgreSQL 17"
+required = true
+timeout_seconds = 1200
+side_effect = "local_write"
+network = false
+retries = 0
+
+[feature.v1-release]
+id = "v1-release"
+slug = "v1-release"
+name = "Stabilize the first migration library major release"
+namespace = "migration"
+parent = ""
+state = "active"
+risk = "critical"
+assurance = "traceable-tests"
+created_at = "2026-10-24T13:43:02Z"
+activated_at = "2026-10-24T13:43:02Z"
+updated_at = "2026-10-24T13:43:02Z"
+folder = "workflow/features/v1-release"
+source_path = "pkg/migration"
+worktree = "/home/linus/.openclaw/workspace/.artifacts/worktrees/gotth-pg-migrate-v1-release"
+branch = "workflow/feature/v1-release"
+scope = ["Freeze the v1 PostgreSQL and migration-state contract", "Admit the exact public API and failure semantics", "Prove one isolated representative consumer", "Create deterministic candidate artifacts and evidence"]
+non_goals = ["Change Mail, Board, or WorldWeave", "Support PostgreSQL majors other than 17", "Add down migrations or dirty flags", "Push, tag, or publish a hosted Release"]
+affected_files = ["README.md", "pkg/migration/**", "docs/**", "scripts/**", "workflow.toml", "workflow.events.jsonl", "workflow/features/v1-release/**"]
+invariants = ["The v1 ledger, checksum, transaction, drift, and advisory-lock semantics are explicit and fixed", "Unknown commit outcomes are never retried", "Consumer evidence uses isolated fixtures only", "No live or shared database is mutated"]
+acceptance = ["Focused local verification passes", "PostgreSQL 17 race/repeat/concurrency/failure verification passes on development", "A clean exact-package consumer admits representative existing migration files", "Deterministic source, checksum, provenance, SPDX, and license artifacts reproduce", "Two independent final reviews are clean"]
+
+[[feature.v1-release.dependency]]
+id = "alpha3-library-admission"
+type = "prerequisite"
+state = "satisfied"
+evidence = "workflow/features/alpha3-library-admission/evidence/verification.md"
+source_commit = "52f21e554958c9be53cad0851da08ff69b6e8dcb"
+satisfied_at = "2026-10-24T13:43:02Z"
+
+[feature.v1-release.rollback]
+strategy = "revert_unpublished_candidate"
+notes = "No tag, push, hosted Release, or live database change is authorized; discard or revert the local candidate."
+data_loss_risk = false
+requires_migration_down = false
+
+[[feature.v1-release.interface]]
+name = "Go migration API and PostgreSQL state contract"
+kind = "api-runtime"
+stability = "stable-v1-candidate"
+change = "freeze"
+
+[[feature.v1-release.verification]]
+id = "local"
+kind = "unit"
+command = "go mod verify, format, vet, race, and coverage"
+required = true
+timeout_seconds = 1200
+side_effect = "local_write"
+network = false
+retries = 0
+
+[[feature.v1-release.verification]]
+id = "postgresql-17"
+kind = "integration"
+command = "race/repeat/failure/concurrency suite against isolated PostgreSQL 17 on development"
+required = true
+timeout_seconds = 1800
+side_effect = "isolated_database_write"
+network = false
+retries = 0
+
+[[feature.v1-release.verification]]
+id = "representative-consumer"
+kind = "integration"
+command = "clean external package with isolated exact Board migration fixtures"
+required = true
+timeout_seconds = 1200
+side_effect = "isolated_database_write"
+network = false
+retries = 0
+
+[[feature.v1-release.verification]]
+id = "artifacts"
+kind = "release"
+command = "build release candidate twice and compare exact checksums"
 required = true
 timeout_seconds = 1200
 side_effect = "local_write"

@@ -24,12 +24,15 @@ Copying ad hoc migration runners between products produces silent divergence.
 - Retrying unknown commit outcomes.
 - Hosting multiple independent migration histories in one database.
 
-## Acceptance
+## v1 acceptance
 
 The library must pass unit, race, drift, malformed-ledger, cancellation,
-concurrency, and PostgreSQL 17 integration tests. Applications remain the sole
-owners of migration SQL and rollout/rollback decisions. A consumer-package
-test must compile against only the exported API.
+concurrency, transaction-failure, and PostgreSQL 17 integration tests. One
+external package must compile against only the frozen API, and one exact
+consumer migration history must pass in isolated fixtures. Deterministic source
+and metadata artifacts, license evidence, and two independent reviews are
+required before publication. Applications remain the sole owners of migration
+SQL and rollout/rollback decisions.
 
 ## Alpha.3 admission requirements
 

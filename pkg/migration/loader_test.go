@@ -32,6 +32,7 @@ func (filesystem controlledFS) ReadFile(string) ([]byte, error) {
 type controlledEntry struct {
 	name    string
 	size    int64
+	mode    fs.FileMode
 	infoErr error
 }
 
@@ -44,7 +45,7 @@ type controlledInfo controlledEntry
 
 func (info controlledInfo) Name() string       { return info.name }
 func (info controlledInfo) Size() int64        { return info.size }
-func (info controlledInfo) Mode() fs.FileMode  { return 0 }
+func (info controlledInfo) Mode() fs.FileMode  { return info.mode }
 func (info controlledInfo) ModTime() time.Time { return time.Time{} }
 func (info controlledInfo) IsDir() bool        { return false }
 func (info controlledInfo) Sys() any           { return nil }
@@ -156,6 +157,10 @@ func TestLoadMigrationsReportsFilesystemFailuresAndDishonestSize(t *testing.T) {
 		"directory read": {dirErr: failure},
 		"file info": {
 			entries: []fs.DirEntry{controlledEntry{name: "000001_initial.sql", infoErr: failure}},
+		},
+		"non-regular file": {
+			entries: []fs.DirEntry{controlledEntry{name: "000001_initial.sql", size: 1, mode: fs.ModeNamedPipe}},
+			body:    []byte("x"),
 		},
 		"file read": {
 			entries: []fs.DirEntry{controlledEntry{name: "000001_initial.sql", size: 1}},

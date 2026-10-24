@@ -11,6 +11,10 @@
 6. `PGM-06` — alpha.3 coding-setup admission: canonical package layout,
    requirement/runtime/performance records, clean-clone verification, and two
    clean Judge passes before the consumer pin.
+7. `PGM-07` — v1 candidate: freeze PostgreSQL 17, ledger, history, lock, drift,
+   checksum, transaction, dirty-state, error, and verification semantics; admit
+   one exact consumer fixture and deterministic release evidence. Tagging and
+   hosted publication remain separate authorized actions.
 
 Each feature requires scoped tests, race verification, coverage evidence, and
 an explicit compatibility ruling. Application migration files never enter this

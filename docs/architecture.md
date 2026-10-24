@@ -11,13 +11,20 @@ non-prefix history, and applies the pending suffix in order. Each SQL file and
 ledger insert commit in the same transaction.
 
 The fixed ledger is deliberate: one application database has one canonical
-GOTTH migration history. Products that attempt to share a database must first
-define ownership instead of adding arbitrary table-name configuration.
+GOTTH migration history. The v1 session lock key is the frozen signed bigint
+`-8593188949330966034`. It serializes this library, not legacy migrators using
+other keys. Products that cut over must stop/drain legacy writers first instead
+of assuming cross-key serialization or adding runtime identifier configuration.
 
+Each file and ledger row has its own transaction; the release as a whole does
+not. A failed file leaves an already committed exact prefix and no dirty flag.
 Cancellation stops new work. Cleanup uses bounded contexts detached from the
 canceled caller. A commit error wraps `ErrCommitOutcomeUnknown` and is never
-retried. The caller uses `errors.Is`, then inspects the ledger before deciding
-what happened.
+retried. The caller uses `errors.Is`, then inspects the ledger and schema before
+deciding what happened.
+
+`ReleaseVerifier` is deliberately read-only and lock-free. It may observe an
+in-progress release between file transactions and fail exact-head readiness.
 
 Trust boundary: migration SQL is trusted release input; database contents and
 preexisting ledger shape are untrusted until attested. No identifiers or SQL

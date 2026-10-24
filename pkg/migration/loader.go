@@ -61,6 +61,9 @@ func loadMigrations(filesystem fs.FS) ([]migrationFile, error) {
 		if err != nil {
 			return nil, fmt.Errorf("inspect migration %s: %w", entry.Name(), err)
 		}
+		if !info.Mode().IsRegular() {
+			return nil, fmt.Errorf("migration %s is not a regular file", entry.Name())
+		}
 		if info.Size() < 1 || info.Size() > maxMigrationBytes {
 			return nil, fmt.Errorf("migration %s size is invalid", entry.Name())
 		}

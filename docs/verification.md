@@ -8,6 +8,8 @@ and bounded cleanup on a disposable PostgreSQL 17 instance. Coverage must accoun
 function and every fail-closed branch; generated or external database behavior
 is not counted as local statement coverage.
 
-The reusable contract is admissible only after an external-package compile
-test, disposable PostgreSQL 17 integration, race repetition, and clean-clone
-verification pass. A tag remains a separate consumer-pinning decision.
+The v1 contract is admissible only after an external-package compile test,
+disposable PostgreSQL 17 failure/concurrency integration, race repetition, a
+representative exact migration fixture, clean-clone verification, deterministic
+artifact reproduction, and two independent clean reviews. A tag and hosted
+Release remain separate publication decisions.

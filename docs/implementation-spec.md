@@ -7,7 +7,8 @@
 
 - Migration filenames match `^[0-9]{6}_[a-z0-9]+(?:_[a-z0-9]+)*\.sql$` and are
   contiguous from version one.
-- The migration filesystem is flat, nonempty, and bounded to one MiB per file.
+- The migration filesystem is flat and nonempty, every entry is a regular
+  file, and each file is bounded to one MiB.
 - The ledger columns are `version bigint`, `name text`, `sha256 bytea`, and
   `applied_at timestamptz default clock_timestamp()` with exact constraints.
 - The package attests columns, defaults, constraints, persistence, row-security
@@ -22,6 +23,8 @@
   ledger-insert, and rollback failures do not.
 - Public functions reject nil and canceled inputs before external work.
 
-Every PostgreSQL 17 patch release is within the initial verified contract;
-major-version expansion requires its own catalog integration evidence. Changes to ledger shape,
-filename grammar, advisory lock identity, or failure semantics are breaking.
+Every PostgreSQL 17 patch release is within the v1 contract; major-version
+expansion requires a new compatibility decision and catalog integration
+evidence. Changes to ledger shape, filename grammar, advisory-lock identity,
+transaction/dirty-state semantics, or unknown-commit classification are
+breaking. Error strings and unexported error identities are not API.
