@@ -4,7 +4,8 @@ The v1 candidate is source-only. Its second archive contains release metadata,
 not a compiled binary.
 
 `scripts/build-release-candidate.sh` accepts one clean full commit, requires
-that commit to equal `HEAD` so the executing script is attested, and emits:
+that commit to equal `HEAD`, and requires the executing script bytes to match
+the script in that commit. It emits:
 
 - a deterministic `git archive` source tarball;
 - an SPDX 2.3 module inventory;
@@ -25,10 +26,13 @@ Bash 5.3.20, Go 1.26.6, Git 2.56.0, GNU tar 1.35, gzip 1.15, jq
 4.11.0-modified, and GNU grep 3.12-modified. The source commit timestamp
 supplies archive mtimes; gzip stores no name or time. The builder fixes `umask`,
 overrides Git `tar.umask`, normalizes metadata modes and owner/group, and sorts
-archive entries.
+archive entries. The requested output directory must not exist; the builder
+stages and verifies every output in a sibling directory, then atomically
+renames that complete directory into place.
 
 The builder clears `GOFLAGS`, disables workspaces and persistent Go environment
-configuration, and rejects module replacements. Read-only
+configuration, rejects every declared `go.mod` replacement, and rejects any
+selected dependency replacement. Read-only
 `go list -deps -test` discovers only modules linked by production or test
 packages and may read the configured module proxy when the cache is cold.
 Every inventoried module has complete hashes in committed `go.sum`; the builder

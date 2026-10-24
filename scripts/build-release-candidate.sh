@@ -35,19 +35,38 @@ first_line() {
 
 usage="usage: $0 OUTPUT_DIRECTORY COMMIT"
 [[ "$#" -eq 2 ]] || { echo "$usage" >&2; exit 2; }
-out=$1
+requested_out=${1%/}
 commit=$2
+[[ -n "$requested_out" ]] || { echo "OUTPUT_DIRECTORY must not be empty" >&2; exit 2; }
 [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "COMMIT must be a full lowercase object ID" >&2; exit 2; }
 [[ "$(git rev-parse "$commit^{commit}")" == "$commit" ]] || { echo "COMMIT does not identify the exact commit" >&2; exit 1; }
 [[ "$(git rev-parse HEAD)" == "$commit" ]] || { echo "HEAD must equal COMMIT so the executed builder is attested" >&2; exit 1; }
 [[ -z "$(git status --short)" ]] || { echo "release worktree must be clean" >&2; exit 1; }
+running_script=$(realpath "${BASH_SOURCE[0]}")
+running_script_sha=$(sha256sum "$running_script" | awk '{print $1}')
+committed_script_sha=$(git show "$commit:scripts/build-release-candidate.sh" | sha256sum | awk '{print $1}')
+[[ "$running_script_sha" == "$committed_script_sha" ]] || { echo "executing builder does not match COMMIT" >&2; exit 1; }
 
+out_parent=$(dirname "$requested_out")
+out_name=$(basename "$requested_out")
+mkdir -p "$out_parent"
+out_parent=$(cd "$out_parent" && pwd)
+final_out="$out_parent/$out_name"
+[[ ! -e "$final_out" ]] || { echo "OUTPUT_DIRECTORY must not already exist" >&2; exit 1; }
+publish_stage=$(mktemp -d "$out_parent/.${out_name}.tmp.XXXXXX")
 root=$(mktemp -d)
-trap 'rm -rf "$root"' EXIT HUP INT TERM
+cleanup() {
+  rm -rf "$root"
+  if [[ -n "$publish_stage" ]]; then
+    rm -rf "$publish_stage"
+  fi
+}
+trap cleanup EXIT
+trap 'exit 130' HUP INT TERM
+out=$publish_stage
 stage="$root/gotth-pg-migrate-$version-metadata"
 source_dir="$root/gotth-pg-migrate-$version"
-mkdir -p "$out" "$stage" "$source_dir"
-out=$(cd "$out" && pwd)
+mkdir -p "$stage" "$source_dir"
 archive="gotth-pg-migrate-$version-source.tar.gz"
 metadata="gotth-pg-migrate-$version-metadata.tar.gz"
 epoch=$(git show -s --format=%ct "$commit")
@@ -62,6 +81,8 @@ printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
 
 (
   cd "$source_dir"
+  go mod edit -json >"$root/go-mod.json"
+  jq -e '(.Replace // []) | length == 0' "$root/go-mod.json" >/dev/null || { echo "go.mod replacements are not allowed" >&2; exit 1; }
   go_sum_before=$(sha256sum go.sum | awk '{print $1}')
   go list -mod=readonly -deps -test -json ./... >"$root/packages.json.stream"
   go_sum_after=$(sha256sum go.sum | awk '{print $1}')
@@ -166,5 +187,9 @@ gzip -n -9 -c "$root/metadata.tar" >"$out/$metadata"
   cd "$out"
   sha256sum "$archive" "$metadata" | sort -k2 >SHA256SUMS
   sha256sum -c SHA256SUMS
+  chmod 0644 "$archive" "$metadata" SHA256SUMS
 )
-printf 'commit=%s\nsource=%s\nmetadata=%s\n' "$commit" "$out/$archive" "$out/$metadata"
+chmod 0755 "$publish_stage"
+mv "$publish_stage" "$final_out"
+publish_stage=
+printf 'commit=%s\nsource=%s\nmetadata=%s\n' "$commit" "$final_out/$archive" "$final_out/$metadata"
