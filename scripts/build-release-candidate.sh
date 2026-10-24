@@ -32,6 +32,13 @@ git archive --format=tar "$commit" | tar -xf - -C "$source_dir"
 source_sha=$(sha256sum "$out/$archive" | awk '{print $1}')
 printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
 
+# Populate every go.sum module in the verified module cache so dependency
+# license evidence covers build and test transitive modules alike.
+(
+  cd "$source_dir"
+  go mod download all
+)
+
 (
   cd "$source_dir"
   go list -mod=readonly -m -json all
