@@ -15,8 +15,9 @@ For an admitted release:
 1. Select a version from this repository's actual compatibility change.
 2. Verify one exact clean candidate commit with every required local, runtime,
    consumer, and review gate.
-3. Build the source and metadata artifacts twice from that full commit with
-   `scripts/build-release-candidate.sh`; require byte-identical checksums and
+3. Record one `SOURCE_DATE_EPOCH` for release-document creation, then build the
+   source and metadata artifacts twice from that full commit with
+   `scripts/build-release-candidate.sh`; reuse that epoch, require byte-identical checksums, and
    inspect the SPDX, provenance, owner license, and dependency legal-file
    bundle under the exact tool contract in `docs/provenance.md`.
 4. Update `docs/CHANGELOG.md` with the version, compatibility effect,

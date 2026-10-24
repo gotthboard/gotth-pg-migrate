@@ -85,8 +85,11 @@ source_dir="$root/gotth-pg-migrate-$version"
 mkdir -p "$stage" "$source_dir"
 archive="gotth-pg-migrate-$version-source.tar.gz"
 metadata="gotth-pg-migrate-$version-metadata.tar.gz"
-epoch=$(git --git-dir="$source_git" show -s --format=%ct "$commit")
-created=$(date -u -d "@$epoch" '+%Y-%m-%dT%H:%M:%SZ')
+source_epoch=$(git --git-dir="$source_git" show -s --format=%ct "$commit")
+creation_epoch=${SOURCE_DATE_EPOCH:-}
+[[ "$creation_epoch" =~ ^[0-9]+$ && "$creation_epoch" -ge "$source_epoch" ]] || { echo "SOURCE_DATE_EPOCH must be the recorded release-document creation time" >&2; exit 1; }
+source_created=$(date -u -d "@$source_epoch" '+%Y-%m-%dT%H:%M:%SZ')
+created=$(date -u -d "@$creation_epoch" '+%Y-%m-%dT%H:%M:%SZ')
 
 git --git-dir="$source_git" -c core.attributesFile=/dev/null -c tar.umask=0022 archive --format=tar --prefix="gotth-pg-migrate-$version/" --output="$root/source.tar" "$commit"
 gzip -n -9 -c "$root/source.tar" >"$out/$archive"
@@ -200,7 +203,7 @@ cp "$source_dir/LICENSE" "$stage/LICENSE"
 cp "$source_dir/docs/release-notes-v1.0.0.md" "$stage/RELEASE_NOTES.md"
 script_sha=$(sha256sum "$source_dir/scripts/build-release-candidate.sh" | awk '{print $1}')
 go_sum_sha=$(sha256sum "$source_dir/go.sum" | awk '{print $1}')
-jq -nS --arg commit "$commit" --arg source_created "$created" --arg archive "$archive" --arg source_sha "$source_sha" --arg script_sha "$script_sha" --arg go_sum_sha "$go_sum_sha" '
+jq -nS --arg commit "$commit" --arg source_created "$source_created" --arg archive "$archive" --arg source_sha "$source_sha" --arg script_sha "$script_sha" --arg go_sum_sha "$go_sum_sha" '
   {
     _type:"https://in-toto.io/Statement/v1",
     subject:[{name:$archive,digest:{sha256:$source_sha}}],
@@ -221,8 +224,8 @@ jq -e --arg commit "$commit" --arg source_sha "$source_sha" '
 
 find "$stage" -type d -exec chmod 0755 {} +
 find "$stage" -type f -exec chmod 0644 {} +
-find "$stage" -exec touch -d "@$epoch" {} +
-tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$epoch" -C "$root" -cf "$root/metadata.tar" "$(basename "$stage")"
+find "$stage" -exec touch -d "@$source_epoch" {} +
+tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$source_epoch" -C "$root" -cf "$root/metadata.tar" "$(basename "$stage")"
 metadata_root=$(basename "$stage")
 printf '%s\n' \
   "$metadata_root/" \

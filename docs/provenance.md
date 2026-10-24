@@ -29,7 +29,10 @@ Bash 5.3.20, Go 1.26.6, Git 2.56.0, GNU tar 1.35, gzip 1.15, jq
 1.8.2, GNU `sha256sum` and `mv` from coreutils 9.12, GNU awk 5.4.1,
 GNU findutils
 4.11.0-modified, and GNU grep 3.12-modified. The source commit timestamp
-supplies archive mtimes; gzip stores no name or time. The builder clears
+supplies archive mtimes; gzip stores no name or time. `SOURCE_DATE_EPOCH` is a
+required recorded input representing the original release-document creation
+time; exact reproductions reuse it, so SPDX `creationInfo.created` remains both
+truthful and byte-stable. The builder clears
 `TAR_OPTIONS`/`GZIP`, fixes `umask`, overrides Git `tar.umask`, normalizes
 metadata modes and owner/group, sorts archive entries, and verifies the exact
 metadata member set. The requested output directory must not exist; the builder
