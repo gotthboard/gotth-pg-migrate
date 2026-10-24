@@ -38,6 +38,7 @@ out=$1
 commit=$2
 [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "COMMIT must be a full lowercase object ID" >&2; exit 2; }
 [[ "$(git rev-parse "$commit^{commit}")" == "$commit" ]] || { echo "COMMIT does not identify the exact commit" >&2; exit 1; }
+[[ "$(git rev-parse HEAD)" == "$commit" ]] || { echo "HEAD must equal COMMIT so the executed builder is attested" >&2; exit 1; }
 [[ -z "$(git status --short)" ]] || { echo "release worktree must be clean" >&2; exit 1; }
 
 root=$(mktemp -d)
@@ -60,10 +61,16 @@ printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
 
 (
   cd "$source_dir"
-  go mod download all
-  go list -mod=readonly -m -json all >"$root/modules.json.stream"
-  go list -mod=readonly -m -f '{{if not .Main}}{{.Path}} {{.Version}} {{.Dir}}{{end}}' all >"$root/modules.list"
+  go_sum_before=$(sha256sum go.sum | awk '{print $1}')
+  go list -mod=readonly -deps -test -json ./... >"$root/packages.json.stream"
+  go_sum_after=$(sha256sum go.sum | awk '{print $1}')
+  [[ "$go_sum_after" == "$go_sum_before" ]] || { echo "dependency discovery changed the committed go.sum" >&2; exit 1; }
+  go mod verify
 )
+jq -cs '[.[].Module | select(. != null)] | unique_by(.Path) | sort_by(.Path) | .[]' \
+  "$root/packages.json.stream" >"$root/modules.json.stream"
+jq -r 'select(.Main | not) | [.Path, .Version, .Dir] | @tsv' \
+  "$root/modules.json.stream" >"$root/modules.list"
 module_count=$(jq -s 'length' "$root/modules.json.stream")
 dependency_count=$(awk 'NF { count++ } END { print count + 0 }' "$root/modules.list")
 [[ "$module_count" -eq $((dependency_count + 1)) && "$dependency_count" -gt 0 ]] || { echo "module inventory is incomplete" >&2; exit 1; }

@@ -11,9 +11,9 @@ const createHistoryTableSQL = `CREATE TABLE IF NOT EXISTS public.gotth_schema_mi
     version bigint PRIMARY KEY,
     name text NOT NULL,
     sha256 bytea NOT NULL,
-    applied_at timestamp with time zone NOT NULL DEFAULT clock_timestamp(),
-    CONSTRAINT gotth_schema_migrations_version_positive CHECK (version > 0),
-    CONSTRAINT gotth_schema_migrations_sha256_length CHECK (octet_length(sha256) = 32)
+    applied_at timestamp with time zone NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+    CONSTRAINT gotth_schema_migrations_version_positive CHECK (version OPERATOR(pg_catalog.>) 0),
+    CONSTRAINT gotth_schema_migrations_sha256_length CHECK (pg_catalog.octet_length(sha256) OPERATOR(pg_catalog.=) 32)
 )`
 
 type migrationExecer interface {
