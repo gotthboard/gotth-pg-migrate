@@ -95,9 +95,9 @@ tar -xf "$root/source-tree.tar" -C "$source_dir"
 git --git-dir="$source_git" ls-tree -rz "$commit" >"$root/source-tree.list"
 tree_entry_count=0
 while IFS= read -r -d '' entry; do
-  metadata=${entry%%$'\t'*}
+  tree_metadata=${entry%%$'\t'*}
   path=${entry#*$'\t'}
-  read -r mode object_type object_id <<<"$metadata"
+  read -r mode object_type object_id <<<"$tree_metadata"
   [[ "$object_type" == blob ]] || { echo "source tree contains unsupported object type: $path" >&2; exit 1; }
   case "$mode" in
     100644) [[ -f "$source_dir/$path" && ! -L "$source_dir/$path" && ! -x "$source_dir/$path" ]] || { echo "source mode mismatch: $path" >&2; exit 1; } ;;
