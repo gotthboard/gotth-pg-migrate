@@ -13,7 +13,9 @@
   `applied_at timestamptz default clock_timestamp()` with exact constraints.
 - The package attests columns, defaults, constraints, persistence, row-security
   state, inheritance, user triggers, and rewrite rules before trusting rows.
-- Applied history is read with a bound of release length plus one.
+- Applied history is read from `ONLY public.gotth_schema_migrations` with a
+  bound of release length plus one; the ledger may have no inheritance edge in
+  either direction.
 - A migration transaction executes the exact SQL string, inserts its digest,
   commits once, and otherwise performs bounded rollback. Migration SQL is
   trusted and must not contain transaction control or manipulate the package

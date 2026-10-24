@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export LC_ALL=C
+export LC_ALL=C GOFLAGS= GOWORK=off GOENV=off
+umask 0022
 version=v1.0.0
 repo=github.com/gotthboard/gotth-pg-migrate
 expected_go=go1.26.6
@@ -52,9 +53,9 @@ metadata="gotth-pg-migrate-$version-metadata.tar.gz"
 epoch=$(git show -s --format=%ct "$commit")
 created=$(date -u -d "@$epoch" '+%Y-%m-%dT%H:%M:%SZ')
 
-git archive --format=tar --prefix="gotth-pg-migrate-$version/" --output="$root/source.tar" "$commit"
+git -c tar.umask=0022 archive --format=tar --prefix="gotth-pg-migrate-$version/" --output="$root/source.tar" "$commit"
 gzip -n -9 -c "$root/source.tar" >"$out/$archive"
-git archive --format=tar --output="$root/source-tree.tar" "$commit"
+git -c tar.umask=0022 archive --format=tar --output="$root/source-tree.tar" "$commit"
 tar -xf "$root/source-tree.tar" -C "$source_dir"
 source_sha=$(sha256sum "$out/$archive" | awk '{print $1}')
 printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
@@ -67,8 +68,12 @@ printf '%s  %s\n' "$source_sha" "$archive" >"$stage/SOURCE_ARCHIVE.sha256"
   [[ "$go_sum_after" == "$go_sum_before" ]] || { echo "dependency discovery changed the committed go.sum" >&2; exit 1; }
   go mod verify
 )
+jq -e -s 'all(.[].Module | select(. != null); .Replace == null)' \
+  "$root/packages.json.stream" >/dev/null || { echo "module replacements are not allowed" >&2; exit 1; }
 jq -cs '[.[].Module | select(. != null)] | unique_by(.Path) | sort_by(.Path) | .[]' \
   "$root/packages.json.stream" >"$root/modules.json.stream"
+jq -e -s 'all(.[] | select(.Main | not); (.Sum | type == "string") and (.Sum | length > 0) and (.GoModSum | type == "string") and (.GoModSum | length > 0))' \
+  "$root/modules.json.stream" >/dev/null || { echo "dependency checksums are incomplete" >&2; exit 1; }
 jq -r 'select(.Main | not) | [.Path, .Version, .Dir] | @tsv' \
   "$root/modules.json.stream" >"$root/modules.list"
 module_count=$(jq -s 'length' "$root/modules.json.stream")
@@ -152,6 +157,8 @@ jq -e --arg commit "$commit" --arg source_sha "$source_sha" '
   .predicate.source.commit == $commit and .subject[0].digest.sha256 == $source_sha
 ' "$stage/provenance.intoto.json" >/dev/null
 
+find "$stage" -type d -exec chmod 0755 {} +
+find "$stage" -type f -exec chmod 0644 {} +
 find "$stage" -exec touch -d "@$epoch" {} +
 tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$epoch" -C "$root" -cf "$root/metadata.tar" "$(basename "$stage")"
 gzip -n -9 -c "$root/metadata.tar" >"$out/$metadata"

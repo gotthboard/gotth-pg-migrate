@@ -8,7 +8,7 @@ import (
 )
 
 const selectAppliedMigrationsSQL = `SELECT version, name, sha256
-FROM public.gotth_schema_migrations
+FROM ONLY public.gotth_schema_migrations
 ORDER BY version
 LIMIT $1`
 

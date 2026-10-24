@@ -30,9 +30,19 @@ outside the v1 contract and can defeat atomicity or serialization.
 
 ## Ledger and history
 
-The sole supported ledger is `public.gotth_schema_migrations` with the exact columns, order, types, constraints, default, persistence, row-security, inheritance, trigger, and rewrite-rule shape defined by the implementation. `Apply` may create it while holding the migration lock, then attests its exact catalog shape before trusting rows. A lookalike or modified table is rejected.
+The sole supported ledger is `public.gotth_schema_migrations` with the exact
+columns, order, types, constraints, default, persistence, row-security,
+inheritance, trigger, rewrite-rule, and expression-dependency shape defined by
+the implementation. It may be neither parent nor child in table inheritance.
+`Apply` may create it while holding the migration lock, then attests its exact
+catalog shape before trusting rows. A lookalike or modified table is rejected.
 
-Rows must be the exact contiguous prefix of the supplied release, starting at version one. Missing, reordered, renamed, checksum-mismatched, or release-unknown rows are rejected. Reads are bounded to release length plus one row. Existing rows are never edited or deleted.
+Rows must be the exact contiguous prefix of the supplied release, starting at
+version one. Missing, reordered, renamed, checksum-mismatched, or
+release-unknown rows are rejected. Reads use
+`ONLY public.gotth_schema_migrations`, are bounded to release length plus one
+row, and cannot consume rows from inherited child tables. Existing rows are
+never edited or deleted.
 
 ## Concurrency and advisory lock
 

@@ -28,7 +28,7 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		}
 	})
 	drop := func(ctx context.Context) {
-		if _, err := conn.Exec(ctx, "DROP TABLE IF EXISTS public.gotth_schema_migrations"); err != nil {
+		if _, err := conn.Exec(ctx, "DROP TABLE IF EXISTS public.gotth_schema_migrations CASCADE"); err != nil {
 			t.Fatalf("drop history table: %v", err)
 		}
 	}
@@ -46,6 +46,7 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		"changed timestamp default": "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN applied_at SET DEFAULT statement_timestamp()",
 		"row security":              "ALTER TABLE public.gotth_schema_migrations ENABLE ROW LEVEL SECURITY",
 		"insert rewrite rule":       "CREATE RULE gotth_schema_migrations_ignore_insert AS ON INSERT TO public.gotth_schema_migrations DO INSTEAD NOTHING",
+		"inherited child":           "CREATE TABLE public.gotth_schema_migrations_child () INHERITS (public.gotth_schema_migrations)",
 	}
 	for name, statement := range drifts {
 		name, statement := name, statement

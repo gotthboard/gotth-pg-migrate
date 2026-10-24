@@ -119,7 +119,11 @@ SELECT
              COALESCE(referenced_function.pronamespace, referenced_operator.oprnamespace)
         WHERE referenced_namespace.nspname OPERATOR(pg_catalog.<>) 'pg_catalog')
     AND NOT EXISTS (
-        SELECT 1 FROM pg_catalog.pg_inherits AS inheritance JOIN target ON target.oid OPERATOR(pg_catalog.=) inheritance.inhrelid)
+        SELECT 1
+        FROM pg_catalog.pg_inherits AS inheritance
+        JOIN target
+          ON target.oid OPERATOR(pg_catalog.=) inheritance.inhrelid
+          OR target.oid OPERATOR(pg_catalog.=) inheritance.inhparent)
     AND NOT EXISTS (
         SELECT 1 FROM pg_catalog.pg_trigger AS trigger_value JOIN target ON target.oid OPERATOR(pg_catalog.=) trigger_value.tgrelid
         WHERE NOT trigger_value.tgisinternal)
