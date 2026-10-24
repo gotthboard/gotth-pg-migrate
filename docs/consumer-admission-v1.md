@@ -17,16 +17,18 @@ or a shared database and does not claim that any product has switched imports.
 ## Mechanism comparison
 
 At the exact Board revision, `api.go`, `attest.go`, `bootstrap.go`,
-`coordinator.go`, `drift.go`, `owner.go`, `query.go`, and `rows.go`
-are byte-identical to the library baseline. The candidate loader adds only an
-explicit regular-file rejection. Its remaining deliberate differences are:
+`coordinator.go`, `drift.go`, `owner.go`, `query.go`, and `rows.go` were
+byte-identical to the library baseline. The v1 candidate deliberately hardens
+that baseline with regular-file validation, schema-qualified built-ins and
+types, exact modifier/collation/index/expression/inheritance attestation,
+`ONLY` history reads, complete connection-error causes, and qualified advisory
+functions. Its public differences are an exported `ErrCommitOutcomeUnknown`,
+an exported readiness query interface usable by direct connections and pools,
+and the library-wide lock key instead of Board's product-local key.
 
-- exported `ErrCommitOutcomeUnknown` while preserving the driver cause;
-- exported readiness query interface usable by direct connections and pools;
-- the library-wide advisory-lock key instead of Board's product-local key.
-
-Ledger shape, exact-byte checksum, prefix/drift rules, transaction boundaries,
-and connection ownership remain compatible. Advisory-lock identity is not
+The exact Board ledger and files pass the stricter candidate unchanged;
+checksum, prefix/drift, per-file transaction, and connection-ownership semantics
+remain compatible. Advisory-lock identity is not
 compatible. A future Board cutover must stop/drain the legacy migrator before
 starting the library and must not run both concurrently.
 

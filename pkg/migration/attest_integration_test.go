@@ -48,6 +48,8 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		"insert rewrite rule":       "CREATE RULE gotth_schema_migrations_ignore_insert AS ON INSERT TO public.gotth_schema_migrations DO INSTEAD NOTHING",
 		"inherited child":           "CREATE TABLE public.gotth_schema_migrations_child () INHERITS (public.gotth_schema_migrations)",
 		"extra index":               "CREATE INDEX gotth_schema_migrations_name_idx ON public.gotth_schema_migrations (name)",
+		"timestamp precision":       "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN applied_at TYPE pg_catalog.timestamptz(0)",
+		"text collation":            "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN name TYPE pg_catalog.text COLLATE \"C\"",
 	}
 	for name, statement := range drifts {
 		name, statement := name, statement

@@ -27,22 +27,42 @@ SELECT
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_attribute AS attribute JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
         WHERE attribute.attnum OPERATOR(pg_catalog.=) 1 AND attribute.attname OPERATOR(pg_catalog.=) 'version'
-          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.int8'::pg_catalog.regtype AND attribute.attnotnull
+          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.int8'::pg_catalog.regtype
+          AND attribute.atttypmod OPERATOR(pg_catalog.=) -1
+          AND attribute.attcollation OPERATOR(pg_catalog.=) (
+              SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_attribute AS attribute JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
         WHERE attribute.attnum OPERATOR(pg_catalog.=) 2 AND attribute.attname OPERATOR(pg_catalog.=) 'name'
-          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.text'::pg_catalog.regtype AND attribute.attnotnull
+          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.text'::pg_catalog.regtype
+          AND attribute.atttypmod OPERATOR(pg_catalog.=) -1
+          AND attribute.attcollation OPERATOR(pg_catalog.=) (
+              SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_attribute AS attribute JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
         WHERE attribute.attnum OPERATOR(pg_catalog.=) 3 AND attribute.attname OPERATOR(pg_catalog.=) 'sha256'
-          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.bytea'::pg_catalog.regtype AND attribute.attnotnull
+          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.bytea'::pg_catalog.regtype
+          AND attribute.atttypmod OPERATOR(pg_catalog.=) -1
+          AND attribute.attcollation OPERATOR(pg_catalog.=) (
+              SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_attribute AS attribute JOIN target ON target.oid OPERATOR(pg_catalog.=) attribute.attrelid
         WHERE attribute.attnum OPERATOR(pg_catalog.=) 4 AND attribute.attname OPERATOR(pg_catalog.=) 'applied_at'
-          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.timestamptz'::pg_catalog.regtype AND attribute.attnotnull
+          AND attribute.atttypid OPERATOR(pg_catalog.=) 'pg_catalog.timestamptz'::pg_catalog.regtype
+          AND attribute.atttypmod OPERATOR(pg_catalog.=) -1
+          AND attribute.attcollation OPERATOR(pg_catalog.=) (
+              SELECT type_value.typcollation FROM pg_catalog.pg_type AS type_value
+              WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
+          AND attribute.attnotnull
           AND attribute.attidentity OPERATOR(pg_catalog.=) '' AND attribute.attgenerated OPERATOR(pg_catalog.=) '')
     AND (SELECT pg_catalog.count(*) OPERATOR(pg_catalog.=) 1
          FROM pg_catalog.pg_attrdef AS default_value

@@ -1,6 +1,7 @@
 # gotth-pg-migrate v1.0.0
 
-First stable release of the small forward-only PostgreSQL migration library extracted from GOTTH Board.
+First stable release of the small forward-only PostgreSQL migration library
+extracted from GOTTH Board.
 
 ## Install
 
@@ -22,7 +23,10 @@ import migration "github.com/gotthboard/gotth-pg-migrate/pkg/migration"
 - Exact-prefix drift rejection and exact-head read-only verification.
 - Machine-detectable unknown commit outcomes through `errors.Is(err, migration.ErrCommitOutcomeUnknown)`.
 
-See [the complete v1 contract](contract-v1.md). A cutover from a legacy product-local migrator requires a stopped/drained writer boundary because its advisory-lock key may differ even when ledger bytes are compatible.
+See [the complete v1 contract](https://github.com/gotthboard/gotth-pg-migrate/blob/v1.0.0/docs/contract-v1.md).
+A cutover from a legacy product-local migrator requires a stopped/drained writer
+boundary because its advisory-lock key may differ even when ledger bytes are
+compatible.
 
 ## Candidate status
 
@@ -32,6 +36,6 @@ The release consists of source plus deterministic metadata: SHA-256 checksums,
 an in-toto source-provenance statement, an SPDX 2.3 module inventory, the MIT
 license, and exact dependency license/notice/patent files. The SPDX deliberately
 uses `NOASSERTION` for third-party license classification.
-[`scripts/build-release-candidate.sh`](../scripts/build-release-candidate.sh)
+[The release builder](https://github.com/gotthboard/gotth-pg-migrate/blob/v1.0.0/scripts/build-release-candidate.sh)
 rebuilds those artifacts from a clean full commit under the pinned
-[builder contract](provenance.md).
+[builder contract](https://github.com/gotthboard/gotth-pg-migrate/blob/v1.0.0/docs/provenance.md).
