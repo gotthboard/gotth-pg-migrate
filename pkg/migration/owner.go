@@ -52,7 +52,10 @@ func applyWithConnector(ctx context.Context, configured *pgx.ConnConfig, filesys
 	}
 	if err != nil {
 		if contextErr := ctx.Err(); contextErr != nil {
-			return fmt.Errorf("migration connection canceled: %w", contextErr)
+			return errors.Join(
+				fmt.Errorf("migration connection canceled: %w", contextErr),
+				fmt.Errorf("connect migration database: %w", err),
+			)
 		}
 		return fmt.Errorf("connect migration database: %w", err)
 	}

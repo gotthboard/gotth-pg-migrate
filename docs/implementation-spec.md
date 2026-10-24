@@ -11,8 +11,9 @@
   file, and each file is bounded to one MiB.
 - The ledger columns are `version bigint`, `name text`, `sha256 bytea`, and
   `applied_at timestamptz default clock_timestamp()` with exact constraints.
-- The package attests columns, defaults, constraints, persistence, row-security
-  state, inheritance, user triggers, and rewrite rules before trusting rows.
+- The package attests columns, defaults, constraints, the sole primary-key
+  index, persistence, row-security state, inheritance in either direction, user
+  triggers, rewrite rules, and expression dependencies before trusting rows.
 - Applied history is read from `ONLY public.gotth_schema_migrations` with a
   bound of release length plus one; the ledger may have no inheritance edge in
   either direction.

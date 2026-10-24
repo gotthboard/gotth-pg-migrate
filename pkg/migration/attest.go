@@ -74,6 +74,9 @@ SELECT
     AND (SELECT pg_catalog.count(*) OPERATOR(pg_catalog.=) 3
          FROM pg_catalog.pg_constraint AS constraint_value
          JOIN target ON target.oid OPERATOR(pg_catalog.=) constraint_value.conrelid)
+    AND (SELECT pg_catalog.count(*) OPERATOR(pg_catalog.=) 1
+         FROM pg_catalog.pg_index AS index_value
+         JOIN target ON target.oid OPERATOR(pg_catalog.=) index_value.indrelid)
     AND EXISTS (
         SELECT 1
         FROM pg_catalog.pg_constraint AS constraint_value

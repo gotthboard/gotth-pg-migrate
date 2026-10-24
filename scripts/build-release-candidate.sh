@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 export LC_ALL=C GOFLAGS= GOWORK=off GOENV=off GIT_NO_REPLACE_OBJECTS=1 GIT_ATTR_NOSYSTEM=1
+export TAR_OPTIONS= GZIP= GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org GOPRIVATE= GONOSUMDB=
 umask 0022
 version=v1.0.0
 repo=github.com/gotthboard/gotth-pg-migrate
@@ -12,6 +13,7 @@ expected_tar='tar (GNU tar) 1.35'
 expected_gzip='gzip 1.15'
 expected_jq='jq-1.8.2'
 expected_coreutils='sha256sum (GNU coreutils) 9.12'
+expected_mv='mv (GNU coreutils) 9.12'
 expected_awk='GNU Awk 5.4.1, API 4.1, PMA Avon 8-g1, (GNU MPFR 4.2.2, GNU MP 6.3.0)'
 expected_find='find (GNU findutils) 4.11.0-modified'
 expected_grep='grep (GNU grep) 3.12-modified'
@@ -29,6 +31,7 @@ first_line() {
 [[ "$(first_line gzip --version)" == "$expected_gzip" ]] || { echo "$expected_gzip is required" >&2; exit 1; }
 [[ "$(jq --version)" == "$expected_jq" ]] || { echo "$expected_jq is required" >&2; exit 1; }
 [[ "$(first_line sha256sum --version)" == "$expected_coreutils" ]] || { echo "$expected_coreutils is required" >&2; exit 1; }
+[[ "$(first_line mv --version)" == "$expected_mv" ]] || { echo "$expected_mv is required" >&2; exit 1; }
 [[ "$(first_line awk --version)" == "$expected_awk" ]] || { echo "$expected_awk is required" >&2; exit 1; }
 [[ "$(first_line find --version)" == "$expected_find" ]] || { echo "$expected_find is required" >&2; exit 1; }
 [[ "$(first_line grep --version)" == "$expected_grep" ]] || { echo "$expected_grep is required" >&2; exit 1; }
@@ -55,6 +58,7 @@ final_out="$out_parent/$out_name"
 publish_stage=$(mktemp -d "$out_parent/.${out_name}.tmp.XXXXXX")
 root=$(mktemp -d)
 source_git="$root/source.git"
+export GOMODCACHE="$root/gomodcache" GOCACHE="$root/gocache"
 git init --bare -q "$source_git"
 git --git-dir="$source_git" fetch -q --no-tags "$repo_root" "$commit"
 [[ "$(git --git-dir="$source_git" rev-parse FETCH_HEAD)" == "$commit" ]] || { echo "isolated source fetch did not preserve COMMIT" >&2; exit 1; }
@@ -187,7 +191,19 @@ find "$stage" -type d -exec chmod 0755 {} +
 find "$stage" -type f -exec chmod 0644 {} +
 find "$stage" -exec touch -d "@$epoch" {} +
 tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$epoch" -C "$root" -cf "$root/metadata.tar" "$(basename "$stage")"
+metadata_root=$(basename "$stage")
+printf '%s\n' \
+  "$metadata_root/" \
+  "$metadata_root/LICENSE" \
+  "$metadata_root/RELEASE_NOTES.md" \
+  "$metadata_root/SOURCE_ARCHIVE.sha256" \
+  "$metadata_root/THIRD_PARTY_LICENSES_AND_NOTICES.txt" \
+  "$metadata_root/gotth-pg-migrate-$version.spdx.json" \
+  "$metadata_root/provenance.intoto.json" >"$root/metadata-expected.list"
+tar -tf "$root/metadata.tar" | sort >"$root/metadata-actual.list"
+[[ "$(cat "$root/metadata-actual.list")" == "$(cat "$root/metadata-expected.list")" ]] || { echo "metadata archive members are incomplete" >&2; exit 1; }
 gzip -n -9 -c "$root/metadata.tar" >"$out/$metadata"
+gzip -t "$out/$metadata"
 (
   cd "$out"
   sha256sum "$archive" "$metadata" | sort -k2 >SHA256SUMS

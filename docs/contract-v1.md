@@ -32,8 +32,8 @@ outside the v1 contract and can defeat atomicity or serialization.
 
 The sole supported ledger is `public.gotth_schema_migrations` with the exact
 columns, order, types, constraints, default, persistence, row-security,
-inheritance, trigger, rewrite-rule, and expression-dependency shape defined by
-the implementation. It may be neither parent nor child in table inheritance.
+inheritance, trigger, rewrite-rule, sole-primary-key-index, and
+expression-dependency shape defined by the implementation. It may be neither parent nor child in table inheritance.
 `Apply` may create it while holding the migration lock, then attests its exact
 catalog shape before trusting rows. A lookalike or modified table is rejected.
 

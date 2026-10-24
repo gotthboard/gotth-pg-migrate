@@ -82,7 +82,7 @@ func TestApplyWithConnectorRejectsInputsAndPreservesFailures(t *testing.T) {
 		{name: "canceled during connect", ctx: connectCanceledContext, config: validConfig, filesystem: validFS, connector: func(context.Context, *pgx.ConnConfig) (ownedMigrationConnection, error) {
 			connectCancel()
 			return nil, connectFailure
-		}, wantCause: context.Canceled},
+		}, wantCause: context.Canceled, wantSecond: connectFailure},
 		{name: "nil connection", ctx: context.Background(), config: validConfig, filesystem: validFS, connector: func(context.Context, *pgx.ConnConfig) (ownedMigrationConnection, error) { return nil, nil }},
 		{name: "coordinator and close failure", ctx: context.Background(), config: validConfig, filesystem: fstest.MapFS{}, connector: func(context.Context, *pgx.ConnConfig) (ownedMigrationConnection, error) {
 			return &stubOwnedReleaseConnection{stubReleaseConnection: readyReleaseConnection(), closeErr: closeFailure}, nil
