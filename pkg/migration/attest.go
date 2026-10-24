@@ -49,7 +49,7 @@ SELECT
               SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
-          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -66,7 +66,7 @@ SELECT
               SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
-          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -83,7 +83,7 @@ SELECT
               SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
-          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
@@ -100,7 +100,7 @@ SELECT
               SELECT type_value.typstorage FROM pg_catalog.pg_type AS type_value
               WHERE type_value.oid OPERATOR(pg_catalog.=) attribute.atttypid)
           AND attribute.attcompression OPERATOR(pg_catalog.=) ''
-          AND attribute.attstattarget OPERATOR(pg_catalog.=) -1 AND attribute.attoptions IS NULL
+          AND attribute.attstattarget IS NULL AND attribute.attoptions IS NULL
           AND attribute.attndims OPERATOR(pg_catalog.=) 0 AND attribute.attislocal
           AND attribute.attinhcount OPERATOR(pg_catalog.=) 0
           AND attribute.attnotnull
