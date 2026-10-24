@@ -13,8 +13,8 @@ const (
 	// ecosystem-wide ledger and lock contract per PostgreSQL database.
 	migrationAdvisoryLockKey int64 = -8593188949330966034
 	migrationUnlockTimeout         = 5 * time.Second
-	acquireMigrationLockSQL        = "SELECT pg_advisory_lock($1)"
-	releaseMigrationLockSQL        = "SELECT pg_advisory_unlock($1)"
+	acquireMigrationLockSQL        = "SELECT pg_catalog.pg_advisory_lock($1)"
+	releaseMigrationLockSQL        = "SELECT pg_catalog.pg_advisory_unlock($1)"
 )
 
 type migrationLockConnection interface {

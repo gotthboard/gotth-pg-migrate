@@ -17,7 +17,16 @@ The v1 API is exactly `Apply`, `NewReleaseVerifier`, `(*ReleaseVerifier).Verify`
 
 The supplied `fs.FS` is a complete release history, not only new migrations. It must be flat and nonempty. Every entry is a regular file named `NNNNNN_description.sql`; versions begin at `000001`, are contiguous, and descriptions contain lowercase letters, digits, and single underscores between nonempty words. Each file contains non-whitespace SQL and is at most 1 MiB.
 
-SHA-256 covers the exact file bytes. Line endings, trailing whitespace, comments, and every other byte are significant. An applied file is immutable: changing its name or bytes is drift.
+SHA-256 covers the exact file bytes. Line endings, trailing whitespace, comments,
+and every other byte are significant. An applied file is immutable: changing
+its name or bytes is drift.
+
+Migration SQL is trusted release code, not sandboxed input. A v1 migration may
+contain multiple statements but must not issue transaction-control statements,
+directly read or modify `public.gotth_schema_migrations`, call advisory-lock
+functions, or otherwise alter the package transaction, ledger, or lock. The
+package does not parse SQL to enforce this boundary. Files that violate it are
+outside the v1 contract and can defeat atomicity or serialization.
 
 ## Ledger and history
 
@@ -35,7 +44,12 @@ Unlock and connection close use bounded five-second contexts detached from calle
 
 ## Transactions, failure, and dirty state
 
-Each pending file is one PostgreSQL transaction: execute exact SQL, insert its ledger row, then commit. The whole release is not one transaction. If file N fails before commit, previously committed files remain an exact prefix and file N SQL plus ledger insert roll back together. A later invocation may resume that prefix after the failure is understood and corrected.
+For contract-compliant SQL, each pending file is one PostgreSQL transaction:
+execute exact SQL, insert its ledger row, then commit. The whole release is not
+one transaction. If file N fails before commit, previously committed files
+remain an exact prefix and file N SQL plus ledger insert roll back together. A
+later invocation may resume that prefix after the failure is understood and
+corrected.
 
 There is no dirty flag. Atomic per-file SQL plus the ledger prefix is the only state model. If `Commit` returns an error, the outcome is unknown; the error matches `ErrCommitOutcomeUnknown`, the package does not retry, and the operator must inspect the ledger and affected schema before deciding whether retry is safe. Down migrations and automatic repair are absent.
 

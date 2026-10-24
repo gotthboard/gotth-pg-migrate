@@ -22,6 +22,7 @@ Copying ad hoc migration runners between products produces silent divergence.
 - Down migrations, ORM integration, schema generation, or application seeding.
 - Supporting databases other than PostgreSQL.
 - Retrying unknown commit outcomes.
+- Parsing, sandboxing, or repairing consumer migration SQL.
 - Hosting multiple independent migration histories in one database.
 
 ## v1 acceptance

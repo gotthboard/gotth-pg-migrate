@@ -26,6 +26,9 @@ deciding what happened.
 `ReleaseVerifier` is deliberately read-only and lock-free. It may observe an
 in-progress release between file transactions and fail exact-head readiness.
 
-Trust boundary: migration SQL is trusted release input; database contents and
-preexisting ledger shape are untrusted until attested. No identifiers or SQL
-fragments come from runtime strings.
+Trust boundary: migration SQL is trusted release code, not sandboxed input. It
+must not control transactions, manipulate the package ledger, or manipulate
+advisory locks; the package intentionally does not embed a PostgreSQL parser.
+Database contents and preexisting ledger shape are untrusted until attested. No
+identifiers or SQL fragments come from runtime strings. Package-owned catalog
+and advisory-lock functions are schema-qualified.

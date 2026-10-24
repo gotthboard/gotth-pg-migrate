@@ -25,7 +25,9 @@ Repository layout:
 
 The library owns no application schema and has no ORM, daemon, down-migration,
 or configuration framework. Applications pass a parsed `pgx.ConnConfig` and an
-`fs.FS` containing files named `000001_description.sql`.
+`fs.FS` containing files named `000001_description.sql`. Migration SQL is
+trusted release code and must not control transactions or manipulate the
+package ledger or advisory lock.
 
 ```go
 if err := migration.Apply(ctx, connectionConfig, migrations); err != nil {

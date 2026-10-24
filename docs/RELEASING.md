@@ -17,7 +17,8 @@ For an admitted release:
    consumer, and review gate.
 3. Build the source and metadata artifacts twice from that full commit with
    `scripts/build-release-candidate.sh`; require byte-identical checksums and
-   inspect the SPDX, provenance, owner license, and dependency-license bundle.
+   inspect the SPDX, provenance, owner license, and dependency legal-file
+   bundle under the exact tool contract in `docs/provenance.md`.
 4. Update `docs/CHANGELOG.md` with the version, compatibility effect,
    verification, and known limitations.
 5. With separate publication authorization, push the candidate and create a new

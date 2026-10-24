@@ -30,7 +30,7 @@ Verification:
 - isolated PostgreSQL 17 failure, drift, concurrency, and repeat gates
 - external-package compilation and exact Board migration fixture admission
 - deterministic source/metadata rebuild with checksum, SPDX, provenance, and
-  license inspection
+  dependency license/notice/patent inspection
 - two independent fresh reviews
 
 Risks / non-goals:

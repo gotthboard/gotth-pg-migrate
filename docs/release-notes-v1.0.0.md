@@ -28,4 +28,10 @@ See [the complete v1 contract](contract-v1.md). A cutover from a legacy product-
 
 This document describes the local `v1.0.0` candidate. No tag or hosted Release exists yet. The final tag must point to the exact admitted candidate; publication must not rebuild from another tree.
 
-The release consists of source plus deterministic metadata: SHA-256 checksums, SLSA-compatible provenance, an SPDX 2.3 SBOM, the MIT license, and exact third-party license texts. `scripts/build-release-candidate.sh` rebuilds those artifacts from a clean full commit.
+The release consists of source plus deterministic metadata: SHA-256 checksums,
+an in-toto source-provenance statement, an SPDX 2.3 module inventory, the MIT
+license, and exact dependency license/notice/patent files. The SPDX deliberately
+uses `NOASSERTION` for third-party license classification.
+[`scripts/build-release-candidate.sh`](../scripts/build-release-candidate.sh)
+rebuilds those artifacts from a clean full commit under the pinned
+[builder contract](provenance.md).

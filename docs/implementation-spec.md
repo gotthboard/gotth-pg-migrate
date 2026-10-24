@@ -15,13 +15,17 @@
   state, inheritance, user triggers, and rewrite rules before trusting rows.
 - Applied history is read with a bound of release length plus one.
 - A migration transaction executes the exact SQL string, inserts its digest,
-  commits once, and otherwise performs bounded rollback.
+  commits once, and otherwise performs bounded rollback. Migration SQL is
+  trusted and must not contain transaction control or manipulate the package
+  ledger or advisory lock; v1 does not parse SQL to enforce that restriction.
 - `ReleaseVerifier` hashes files once and performs read-only exact-head checks.
 - `VerificationQuerier` names only the `Query` and `QueryRow` methods needed by
   readiness and is satisfied by direct pgx connections and pools.
 - Every transaction commit failure wraps `ErrCommitOutcomeUnknown`; execution,
   ledger-insert, and rollback failures do not.
 - Public functions reject nil and canceled inputs before external work.
+- Package-owned PostgreSQL catalog and advisory-lock function references are
+  schema-qualified and do not depend on caller `search_path`.
 
 Every PostgreSQL 17 patch release is within the v1 contract; major-version
 expansion requires a new compatibility decision and catalog integration

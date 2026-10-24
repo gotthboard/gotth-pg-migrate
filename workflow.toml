@@ -315,9 +315,9 @@ retries = 0
 [[feature.v1-release.verification]]
 id = "artifacts"
 kind = "release"
-command = "build release candidate twice and compare exact checksums"
+command = "build release candidate twice under the pinned builder contract and compare exact checksums"
 required = true
 timeout_seconds = 1200
 side_effect = "local_write"
-network = false
+network = true
 retries = 0

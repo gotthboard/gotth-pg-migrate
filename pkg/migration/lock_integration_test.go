@@ -29,6 +29,24 @@ func TestWithMigrationLockOwnsOnePostgreSQLSessionLock(t *testing.T) {
 	}
 	defer observer.Close(context.Background())
 
+	const shadowSQL = `DROP SCHEMA IF EXISTS gotth_lock_shadow CASCADE;
+CREATE SCHEMA gotth_lock_shadow;
+CREATE FUNCTION gotth_lock_shadow.pg_advisory_lock(bigint) RETURNS void
+LANGUAGE sql AS 'SELECT NULL';
+CREATE FUNCTION gotth_lock_shadow.pg_advisory_unlock(bigint) RETURNS boolean
+LANGUAGE sql AS 'SELECT true';
+SET search_path TO gotth_lock_shadow, pg_catalog`
+	if _, err := owner.Exec(ctx, shadowSQL); err != nil {
+		t.Fatalf("install hostile advisory-lock functions: %v", err)
+	}
+	t.Cleanup(func() {
+		cleanupContext, cleanupCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cleanupCancel()
+		if _, err := observer.Exec(cleanupContext, "DROP SCHEMA IF EXISTS gotth_lock_shadow CASCADE"); err != nil {
+			t.Errorf("drop hostile advisory-lock schema: %v", err)
+		}
+	})
+
 	if err := withMigrationLock(ctx, owner, func() error {
 		var acquired bool
 		if err := observer.QueryRow(ctx, "SELECT pg_try_advisory_lock($1)", migrationAdvisoryLockKey).Scan(&acquired); err != nil {
