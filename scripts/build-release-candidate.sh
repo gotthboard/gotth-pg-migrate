@@ -119,7 +119,7 @@ module_index=0
   done <"$root/modules.list"
 } >"$legal_bundle"
 [[ "$module_index" -eq "$dependency_count" ]] || { echo "dependency legal-file scan is incomplete" >&2; exit 1; }
-legal_dependency_count=$(grep -Ec '^===== .* / (LICENSE|COPYING)' "$legal_bundle")
+legal_dependency_count=$(grep -Eic '^===== .* / (LICENSE|COPYING)' "$legal_bundle")
 [[ "$legal_dependency_count" -ge "$dependency_count" ]] || { echo "dependency license bundle is incomplete" >&2; exit 1; }
 
 cp "$source_dir/LICENSE" "$stage/LICENSE"
