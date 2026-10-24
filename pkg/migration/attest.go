@@ -129,7 +129,10 @@ SELECT
                   FROM pg_catalog.pg_tablespace AS tablespace_value
                   WHERE tablespace_value.spcname OPERATOR(pg_catalog.=) 'pg_default')
           AND index_class.reloptions IS NULL
-          AND pg_catalog.pg_get_constraintdef(constraint_value.oid, false) OPERATOR(pg_catalog.=) 'PRIMARY KEY (version)')
+          AND pg_catalog.replace(
+                  pg_catalog.pg_get_constraintdef(constraint_value.oid, false),
+                  ' USING INDEX TABLESPACE pg_default', '')
+              OPERATOR(pg_catalog.=) 'PRIMARY KEY (version)')
     AND EXISTS (
         SELECT 1 FROM pg_catalog.pg_constraint AS constraint_value JOIN target ON target.oid OPERATOR(pg_catalog.=) constraint_value.conrelid
         WHERE constraint_value.conname OPERATOR(pg_catalog.=) 'gotth_schema_migrations_version_positive' AND constraint_value.contype OPERATOR(pg_catalog.=) 'c'

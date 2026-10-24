@@ -8,10 +8,11 @@ import (
 )
 
 const createHistoryTableSQL = `CREATE TABLE IF NOT EXISTS public.gotth_schema_migrations (
-    version pg_catalog.int8 PRIMARY KEY,
+    version pg_catalog.int8 NOT NULL,
     name pg_catalog.text NOT NULL,
     sha256 pg_catalog.bytea NOT NULL,
     applied_at pg_catalog.timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+    CONSTRAINT gotth_schema_migrations_pkey PRIMARY KEY (version) USING INDEX TABLESPACE pg_default,
     CONSTRAINT gotth_schema_migrations_version_positive CHECK (version OPERATOR(pg_catalog.>) 0),
     CONSTRAINT gotth_schema_migrations_sha256_length CHECK (pg_catalog.octet_length(sha256) OPERATOR(pg_catalog.=) 32)
 ) TABLESPACE pg_default`

@@ -42,6 +42,14 @@ func TestEnsureHistoryTableOnPostgreSQL17(t *testing.T) {
 	})
 
 	requirePostgreSQL17(t, ctx, conn)
+	if _, err := conn.Exec(ctx, "SET default_tablespace TO pg_global"); err != nil {
+		t.Fatalf("set hostile default_tablespace: %v", err)
+	}
+	defer func() {
+		if _, err := conn.Exec(context.Background(), "RESET default_tablespace"); err != nil {
+			t.Errorf("reset default_tablespace: %v", err)
+		}
+	}()
 	if err := ensureHistoryTable(ctx, conn); err != nil {
 		t.Fatalf("ensureHistoryTable() first call: %v", err)
 	}
