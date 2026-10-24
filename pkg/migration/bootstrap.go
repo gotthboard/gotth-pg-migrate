@@ -15,7 +15,7 @@ const createHistoryTableSQL = `CREATE TABLE IF NOT EXISTS public.gotth_schema_mi
     CONSTRAINT gotth_schema_migrations_pkey PRIMARY KEY (version) USING INDEX TABLESPACE pg_default,
     CONSTRAINT gotth_schema_migrations_version_positive CHECK (version OPERATOR(pg_catalog.>) 0),
     CONSTRAINT gotth_schema_migrations_sha256_length CHECK (pg_catalog.octet_length(sha256) OPERATOR(pg_catalog.=) 32)
-) TABLESPACE pg_default`
+) USING heap TABLESPACE pg_default`
 
 type migrationExecer interface {
 	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)

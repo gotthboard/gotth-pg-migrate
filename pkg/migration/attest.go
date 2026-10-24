@@ -11,10 +11,14 @@ const attestHistoryTableSQL = `WITH target AS (
     SELECT class.oid
     FROM pg_catalog.pg_class AS class
     JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid OPERATOR(pg_catalog.=) class.relnamespace
+    JOIN pg_catalog.pg_am AS table_access_method ON table_access_method.oid OPERATOR(pg_catalog.=) class.relam
     WHERE namespace.nspname OPERATOR(pg_catalog.=) 'public'
       AND class.relname OPERATOR(pg_catalog.=) 'gotth_schema_migrations'
       AND class.relkind OPERATOR(pg_catalog.=) 'r'
       AND class.relpersistence OPERATOR(pg_catalog.=) 'p'
+      AND table_access_method.amname OPERATOR(pg_catalog.=) 'heap'
+      AND class.reloptions IS NULL AND class.relreplident OPERATOR(pg_catalog.=) 'd'
+      AND NOT class.relispartition
       AND COALESCE(NULLIF(class.reltablespace, 0), (
           SELECT database_value.dattablespace
           FROM pg_catalog.pg_database AS database_value
@@ -118,6 +122,17 @@ SELECT
           AND index_value.indislive AND NOT index_value.indcheckxmin AND NOT index_value.indnullsnotdistinct
           AND NOT index_value.indisclustered AND NOT index_value.indisexclusion AND NOT index_value.indisreplident
           AND index_value.indnkeyatts OPERATOR(pg_catalog.=) 1 AND index_value.indnatts OPERATOR(pg_catalog.=) 1
+          AND index_value.indkey OPERATOR(pg_catalog.=) '1'::pg_catalog.int2vector
+          AND index_value.indcollation OPERATOR(pg_catalog.=) '0'::pg_catalog.oidvector
+          AND index_value.indoption OPERATOR(pg_catalog.=) '0'::pg_catalog.int2vector
+          AND index_value.indclass[0] OPERATOR(pg_catalog.=) (
+              SELECT operator_class.oid
+              FROM pg_catalog.pg_opclass AS operator_class
+              JOIN pg_catalog.pg_am AS operator_access_method
+                ON operator_access_method.oid OPERATOR(pg_catalog.=) operator_class.opcmethod
+              WHERE operator_access_method.amname OPERATOR(pg_catalog.=) 'btree'
+                AND operator_class.opcintype OPERATOR(pg_catalog.=) 'pg_catalog.int8'::pg_catalog.regtype
+                AND operator_class.opcdefault)
           AND index_value.indexprs IS NULL AND index_value.indpred IS NULL
           AND access_method.amname OPERATOR(pg_catalog.=) 'btree'
           AND COALESCE(NULLIF(index_class.reltablespace, 0), (

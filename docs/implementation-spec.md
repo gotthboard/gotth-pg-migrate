@@ -13,8 +13,10 @@
   residue: `version bigint`, `name text`, `sha256 bytea`, and `applied_at
   timestamptz default clock_timestamp()` with exact modifiers, collations, and
   constraints.
-- The package attests columns, defaults, constraints, the sole btree
-  primary-key index with default tablespace and no relation options, persistence,
+- The package attests columns, defaults, constraints, heap storage with
+  `pg_default` effective tablespace, default replica identity, no table options,
+  and the sole btree primary-key index with exact vectors/flags, `pg_default`
+  effective tablespace, and no index options. It also attests persistence,
   row-security state, inheritance in either direction, user
   triggers, rewrite rules, and expression dependencies before trusting rows.
 - Applied history is read from `ONLY public.gotth_schema_migrations` with a

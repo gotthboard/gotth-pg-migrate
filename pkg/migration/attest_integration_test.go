@@ -52,6 +52,8 @@ func TestAttestHistoryTableRejectsCatalogDriftOnPostgreSQL17(t *testing.T) {
 		"text collation":            "ALTER TABLE public.gotth_schema_migrations ALTER COLUMN name TYPE pg_catalog.text COLLATE \"C\"",
 		"dropped column residue":    "ALTER TABLE public.gotth_schema_migrations ADD COLUMN residue pg_catalog.text; ALTER TABLE public.gotth_schema_migrations DROP COLUMN residue",
 		"primary index options":     "ALTER INDEX public.gotth_schema_migrations_pkey SET (fillfactor=50)",
+		"table options":             "ALTER TABLE public.gotth_schema_migrations SET (fillfactor=50)",
+		"replica identity":          "ALTER TABLE public.gotth_schema_migrations REPLICA IDENTITY NOTHING",
 	}
 	for name, statement := range drifts {
 		name, statement := name, statement
